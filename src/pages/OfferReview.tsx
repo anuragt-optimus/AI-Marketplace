@@ -20,7 +20,6 @@ import { SupplementalContentEdit } from "@/components/review/sections/editable/S
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 
 const OfferReview = () => {
   const { offerId } = useParams();
@@ -124,17 +123,17 @@ const OfferReview = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from("offers")
-        .select("*")
-        .eq("id", offerId)
-        .single();
+      // const { data, error } = await supabase
+      //   .from("offers")
+      //   .select("*")
+      //   .eq("id", offerId)
+      //   .single();
 
-      if (!error && data) {
-        setOfferData(data);
-      } else {
-        console.warn("⚠️ Supabase returned no data — using mock offer.");
-      }
+      // if (!error && data) {
+      //   setOfferData(data);
+      // } else {
+      //   console.warn("⚠️ Supabase returned no data — using mock offer.");
+      // }
     } catch (err) {
       console.warn("⚠️ Supabase fetch error — using mock offer.", err);
     } finally {
@@ -170,12 +169,12 @@ const OfferReview = () => {
 
     try {
       const columnName = columnMap[sectionId];
-      const { error } = await supabase
-        .from('offers')
-        .update({ [columnName]: updatedData })
-        .eq('id', offerId);
+      // const { error } = await supabase
+      //   .from('offers')
+      //   .update({ [columnName]: updatedData })
+      //   .eq('id', offerId);
 
-      if (error) throw error;
+      // if (error) throw error;
 
       setOfferData((prev: any) => ({
         ...prev,

@@ -21,5 +21,5 @@ export const msalConfig = {
 };
 
 export const loginRequest = {
-  scopes: ["https://api.partner.microsoft.com/.default"],
+  scopes: ["User.Read", "email", "profile"],
 };

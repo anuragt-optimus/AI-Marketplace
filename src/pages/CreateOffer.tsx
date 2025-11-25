@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { OfferInputForm } from "@/components/offers/OfferInputForm";
 import { GeneratingLoader } from "@/components/offers/GeneratingLoader";
-import { supabase } from "@/integrations/supabase/client";
+
 import { toast } from "@/hooks/use-toast";
 
 const CreateOffer = () => {
@@ -30,6 +30,7 @@ const CreateOffer = () => {
   }, 200);
 
   try {
+    
     // Simulating offer creation (replace with real logic later)
     const dummyOfferId = "123"; 
 
