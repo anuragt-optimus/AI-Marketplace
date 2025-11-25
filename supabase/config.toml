@@ -1,0 +1,10 @@
+project_id = "unxgozolazhkdhqhpqgy"
+
+[functions.generate-offer]
+verify_jwt = true
+
+[functions.publish-to-partner-center]
+verify_jwt = true
+
+[functions.regenerate-field]
+verify_jwt = true
