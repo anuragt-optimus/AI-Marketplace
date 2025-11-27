@@ -19,21 +19,14 @@ import { ResellCSPEdit } from "@/components/review/sections/editable/ResellCSPEd
 import { SupplementalContentEdit } from "@/components/review/sections/editable/SupplementalContentEdit";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-<<<<<<< HEAD
 import { partnerCenterApi } from "@/services/partnerCenterApi";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-=======
-import { toast } from "sonner";
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
 
 const OfferReview = () => {
   const { offerId } = useParams();
   const navigate = useNavigate();
-<<<<<<< HEAD
   const { msalInstance, isInitialized } = useAuth();
-=======
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
   const [activeSection, setActiveSection] = useState<string>("");
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [offerData, setOfferData] = useState<any>({
@@ -41,12 +34,9 @@ const OfferReview = () => {
   website_url: "https://example.com",
 
   offer_setup: {
-<<<<<<< HEAD
     offerAlias: "AI Video Suite",
     sellThroughMicrosoft: true,
     enableTestDrive: false,
-=======
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
     category: "Productivity",
     publisherName: "TechLabs Inc.",
     type: "SaaS Subscription",
@@ -54,7 +44,6 @@ const OfferReview = () => {
   },
 
   properties: {
-<<<<<<< HEAD
     categories: {
       primary: "Productivity",
       secondary: ["AI", "Video", "Content Creation"]
@@ -66,8 +55,6 @@ const OfferReview = () => {
       privacyPolicyUrl: "https://example.com/privacy",
       termsOfUseUrl: "https://example.com/terms"
     },
-=======
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
     sku: "AI-VIDEO-SUITE-001",
     publisherId: "PUB-123456",
     version: "v1.0",
@@ -113,13 +100,10 @@ const OfferReview = () => {
   ],
 
   technical_config: {
-<<<<<<< HEAD
     landingPageUrl: "https://example.com/landing",
     connectionWebhook: "https://example.com/webhook",
     entraAppId: "12345678-1234-1234-1234-123456789012",
     entraTenantId: "87654321-4321-4321-4321-210987654321",
-=======
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
     integrationType: "OAuth2",
     loginUrl: "https://example.com/login",
     webhookEnabled: true,
@@ -127,33 +111,24 @@ const OfferReview = () => {
   },
 
   preview_audience: {
-<<<<<<< HEAD
     previewAudience: ["preview.user@example.com", "qa@example.com"],
-=======
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
     testerEmails: ["preview.user@example.com", "qa@example.com"],
     allowSandboxTesting: true,
   },
 
   resell_csp: {
-<<<<<<< HEAD
     resellThroughCSP: "all",
     specificCSPs: [],
-=======
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
     availableForResellers: true,
     partnerMargin: "15%",
     contractRequired: false,
   },
 
   supplemental_content: {
-<<<<<<< HEAD
     supplementalContent: {
       saasScenario: "fullyHosted",
       subscriptionIds: ["12345678-1234-1234-1234-123456789012"]
     },
-=======
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
     documents: [
       { name: "User Guide", url: "https://via.placeholder.com/pdf" },
       { name: "Marketing Kit", url: "https://via.placeholder.com/pdf" },
@@ -164,7 +139,6 @@ const OfferReview = () => {
   },
 });
 
-<<<<<<< HEAD
   const [isLoading, setIsLoading] = useState(true);
 
 
@@ -173,21 +147,10 @@ const OfferReview = () => {
     // Only proceed if MSAL is initialized
     if (!isInitialized) {
       console.log("MSAL not initialized yet, waiting...");
-=======
-  const [isLoading, setIsLoading] = useState(false);
-
-
-  useEffect(() => {
-  const fetchOffer = async () => {
-    if (!offerId) {
-      toast.error("No offer ID provided");
-      navigate("/offers");
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
       return;
     }
 
     try {
-<<<<<<< HEAD
       // 1. Get account
       const accounts = msalInstance.getAllAccounts();
       if (!accounts.length) {
@@ -334,27 +297,11 @@ const OfferReview = () => {
     } catch (error) {
       console.error("Error loading offer:", error);
       // Continue with demo data for now
-=======
-      // const { data, error } = await supabase
-      //   .from("offers")
-      //   .select("*")
-      //   .eq("id", offerId)
-      //   .single();
-
-      // if (!error && data) {
-      //   setOfferData(data);
-      // } else {
-      //   console.warn("⚠️ Supabase returned no data — using mock offer.");
-      // }
-    } catch (err) {
-      console.warn("⚠️ Supabase fetch error — using mock offer.", err);
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
     } finally {
       setIsLoading(false);
     }
   };
 
-<<<<<<< HEAD
   loadOffer();
 }, [offerId, msalInstance, isInitialized]);
 
@@ -380,15 +327,6 @@ const OfferReview = () => {
       console.error('Publish preparation failed:', error);
       toast.error("Failed to prepare offer for publishing");
     }
-=======
-  fetchOffer();
-}, [offerId]);
-
-
-  const handleApproveAndPublish = () => {
-    toast.success("Preparing to publish offer...");
-    navigate(`/offer/publish/${offerId}`);
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
   };
 
   const handleEditSection = (sectionId: string, sectionName: string) => {
@@ -489,21 +427,13 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <OfferSetupEdit
-<<<<<<< HEAD
                   data={offerData.offer_setup || {}}
-=======
-                  data={offerData.offer_setup}
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
                   onSave={(data) => handleSaveSection('offerSetup', data)}
                   onCancel={handleCancelEdit}
                 />
               }
             >
-<<<<<<< HEAD
               <OfferSetupSection data={offerData.offer_setup || {}} />
-=======
-              <OfferSetupSection data={offerData.offer_setup} />
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
             </OfferSectionCard>
 
             {/* Properties */}
@@ -515,11 +445,7 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <PropertiesEdit
-<<<<<<< HEAD
                   data={offerData.properties || {}}
-=======
-                  data={offerData.properties}
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
                   websiteUrl={offerData.website_url}
                   offerId={offerId || ''}
                   onSave={(data) => handleSaveSection('properties', data)}
@@ -527,11 +453,7 @@ const OfferReview = () => {
                 />
               }
             >
-<<<<<<< HEAD
               <PropertiesSection data={offerData.properties || {}} />
-=======
-              <PropertiesSection data={offerData.properties} />
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
             </OfferSectionCard>
 
             {/* Offer Listing */}
@@ -543,11 +465,7 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <OfferListingEdit
-<<<<<<< HEAD
                   data={offerData.offer_listing || {}}
-=======
-                  data={offerData.offer_listing}
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
                   websiteUrl={offerData.website_url}
                   offerId={offerId || ''}
                   existingOfferData={offerData}
@@ -556,11 +474,7 @@ const OfferReview = () => {
                 />
               }
             >
-<<<<<<< HEAD
               <OfferListingSection data={offerData.offer_listing || {}} />
-=======
-              <OfferListingSection data={offerData.offer_listing} />
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
             </OfferSectionCard>
 
             {/* Plans & Pricing */}
@@ -633,21 +547,13 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <TechnicalConfigEdit
-<<<<<<< HEAD
                   data={offerData.technical_config || {}}
-=======
-                  data={offerData.technical_config}
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
                   onSave={(data) => handleSaveSection('technicalConfig', data)}
                   onCancel={handleCancelEdit}
                 />
               }
             >
-<<<<<<< HEAD
               <TechnicalConfigSection data={offerData.technical_config || {}} />
-=======
-              <TechnicalConfigSection data={offerData.technical_config} />
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
             </OfferSectionCard>
 
             {/* Preview Audience */}
@@ -659,21 +565,13 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <PreviewAudienceEdit
-<<<<<<< HEAD
                   data={offerData.preview_audience || {}}
-=======
-                  data={offerData.preview_audience}
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
                   onSave={(data) => handleSaveSection('previewAudience', data)}
                   onCancel={handleCancelEdit}
                 />
               }
             >
-<<<<<<< HEAD
               <PreviewAudienceSection data={offerData.preview_audience || {}} />
-=======
-              <PreviewAudienceSection data={offerData.preview_audience} />
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
             </OfferSectionCard>
 
             {/* Resell through CSPs */}
@@ -685,21 +583,13 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <ResellCSPEdit
-<<<<<<< HEAD
                   data={offerData.resell_csp || {}}
-=======
-                  data={offerData.resell_csp}
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
                   onSave={(data) => handleSaveSection('resellCSP', data)}
                   onCancel={handleCancelEdit}
                 />
               }
             >
-<<<<<<< HEAD
               <ResellCSPSection data={offerData.resell_csp || {}} />
-=======
-              <ResellCSPSection data={offerData.resell_csp} />
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
             </OfferSectionCard>
 
             {/* Supplemental Content */}
@@ -711,21 +601,13 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <SupplementalContentEdit
-<<<<<<< HEAD
                   data={{ supplementalContent: offerData.supplemental_content?.supplementalContent || {} }}
-=======
-                  data={{ supplementalContent: offerData.supplemental_content }}
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
                   onSave={(data) => handleSaveSection('supplementalContent', data.supplementalContent)}
                   onCancel={handleCancelEdit}
                 />
               }
             >
-<<<<<<< HEAD
               <SupplementalContentSection data={{ supplementalContent: offerData.supplemental_content?.supplementalContent || {} }} />
-=======
-              <SupplementalContentSection data={{ supplementalContent: offerData.supplemental_content }} />
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
             </OfferSectionCard>
           </div>
         </div>

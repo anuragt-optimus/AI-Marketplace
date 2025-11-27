@@ -17,7 +17,6 @@ export const msalConfig = {
       logLevel: LogLevel.Info,
       piiLoggingEnabled: false,
     },
-<<<<<<< HEAD
 
   },
 };
@@ -34,11 +33,4 @@ export const partnerCenterConfig = {
   clientSecret: "" ,
   scope: "https://graph.microsoft.com/.default",
   tokenUrl: `https://login.microsoftonline.com/b5db11ac-8f37-4109-a146-5d7a302f5881/oauth2/v2.0/token`
-=======
-  },
-};
-
-export const loginRequest = {
-  scopes: ["User.Read", "email", "profile"],
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
 };

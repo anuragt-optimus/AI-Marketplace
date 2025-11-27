@@ -69,15 +69,9 @@ export const OfferListingSection = ({ data }: OfferListingSectionProps) => {
               <p className="text-xs text-muted-foreground">
                 {data.shortDescription.length} / 200 characters
               </p>
-<<<<<<< HEAD
                <Badge variant={data.shortDescription.length <= 200 ? "default" : "destructive"}>
                 {data.shortDescription.length <= 200 ? "✓ Valid" : "⚠️ Too long"}
               </Badge> 
-=======
-              <Badge variant={data.shortDescription.length <= 200 ? "default" : "destructive"}>
-                {data.shortDescription.length <= 200 ? "✓ Valid" : "⚠️ Too long"}
-              </Badge>
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
             </div>
           </div>
         )}

@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-<<<<<<< HEAD
 import { PublicClientApplication, AccountInfo } from "@azure/msal-browser";
 import { msalConfig } from "@/config/authConfig";
 import { useState, useEffect } from "react";
@@ -61,15 +60,6 @@ export const Header = () => {
     logout();
     // If logout() performs msalInstance.logoutRedirect(), it will redirect by itself.
     // If not, keep the navigate to send user to /login:
-=======
-
-export const Header = () => {
-  const { user, selectedAccount, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
     navigate("/login");
   };
 
@@ -82,16 +72,11 @@ export const Header = () => {
           </div>
           <span className="font-bold text-lg text-foreground">Optimus Marketplace Studio</span>
         </div>
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
         {selectedAccount && (
           <div className="hidden md:flex items-center gap-2 ml-4 px-3 py-1.5 rounded-md bg-muted/50">
             <Building2 className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-foreground font-medium">{selectedAccount.name}</span>
-<<<<<<< HEAD
             <Badge variant="secondary" className="text-xs">
               {selectedAccount.publisherId}
             </Badge>
@@ -99,13 +84,6 @@ export const Header = () => {
         )}
       </div>
 
-=======
-            <Badge variant="secondary" className="text-xs">{selectedAccount.publisherId}</Badge>
-          </div>
-        )}
-      </div>
-      
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon">
           <Bell className="h-5 w-5" />
@@ -113,37 +91,21 @@ export const Header = () => {
         <Button variant="ghost" size="icon">
           <Settings className="h-5 w-5" />
         </Button>
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
               <Avatar className="h-8 w-8">
-<<<<<<< HEAD
                 <AvatarImage src={avatarSrc} />
                 <AvatarFallback>{initials}</AvatarFallback>
-=======
-                <AvatarImage src={user?.avatar} />
-                <AvatarFallback>
-                  {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
-                </AvatarFallback>
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-<<<<<<< HEAD
                 <p className="text-sm font-medium">{displayName}</p>
                 <p className="text-xs text-muted-foreground">{email}</p>
-=======
-                <p className="text-sm font-medium">{user?.name}</p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -167,8 +129,4 @@ export const Header = () => {
       </div>
     </header>
   );
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> 37b679081df77938da66b621e07bfb79a56632a3

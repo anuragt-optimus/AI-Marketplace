@@ -7,12 +7,6 @@ interface PartnerCenterApiResponse {
   message?: string;
 }
 
-interface GraphTokenResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-  scope: string;
-}
 
 class PartnerCenterApiService {
   private graphToken: string | null = null;
