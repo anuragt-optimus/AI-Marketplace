@@ -67,31 +67,32 @@ const Login = () => {
 
 
   const handleLogin = async () => {
-        setIsLoading(true);
-        try {
-          // guard initialize (may not exist)
-          if (typeof (msalInstance as any).initialize === "function") {
-            await (msalInstance as any).initialize();
-          }
-  
-          // Only logout if accounts exist and logoutPopup is available
-          const accounts = msalInstance.getAllAccounts();
-          if (accounts.length > 0 && typeof (msalInstance as any).logoutPopup === "function") {
-            await (msalInstance as any).logoutPopup();
-          }
-    // Trigger redirect login
-          await msalInstance.loginRedirect(loginRequest);
-        } catch (error: any) {
-          console.error("Login error:", error);
-          toast({
-            title: "Login Failed",
-            description: error.message || "Unable to start Microsoft login flow.",
-            variant: "destructive",
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      };
+  setIsLoading(true); // start loading instantly
+
+  try {
+    if (typeof (msalInstance as any).initialize === "function") {
+      await (msalInstance as any).initialize();
+    }
+
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0 && typeof (msalInstance as any).logoutPopup === "function") {
+      await (msalInstance as any).logoutPopup();
+    }
+
+    // 🚀 redirect — page navigation will happen immediately
+    msalInstance.loginRedirect(loginRequest);
+  } catch (error: any) {
+    console.error("Login error:", error);
+    toast({
+      title: "Login Failed",
+      description: error.message || "Unable to start Microsoft login flow.",
+      variant: "destructive",
+    });
+
+    setIsLoading(false); // only stop loading if login failed
+  }
+};
+
 
   // const handleMicrosoftLogin = () => {
   //   // Simulate Microsoft OAuth login
@@ -141,37 +142,43 @@ const Login = () => {
           </div>
 
           <div className="space-y-4">
-            <Button onClick={handleLogin} className="w-full h-12 text-base bg-[#0078D4] hover:bg-[#106EBE] text-white" size="lg">
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 23 23" fill="none">
-                <rect x="1" y="1" width="10" height="10" fill="#F25022" />
-                <rect x="12" y="1" width="10" height="10" fill="#7FBA00" />
-                <rect x="1" y="12" width="10" height="10" fill="#00A4EF" />
-                <rect x="12" y="12" width="10" height="10" fill="#FFB900" />
-              </svg>
-              Sign in with Microsoft
-            </Button>
+            <Button
+  onClick={handleLogin}
+  className="w-full h-12 text-base bg-[#0078D4] hover:bg-[#106EBE] text-white"
+  size="lg"
+  disabled={isLoading}
+>
+  {isLoading ? (
+    <svg
+      className="animate-spin h-5 w-5 mr-2 text-white"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
+    </svg>
+  ) : (
+    <svg className="w-5 h-5 mr-2" viewBox="0 0 23 23" fill="none">
+      <rect x="1" y="1" width="10" height="10" fill="#F25022" />
+      <rect x="12" y="1" width="10" height="10" fill="#7FBA00" />
+      <rect x="1" y="12" width="10" height="10" fill="#00A4EF" />
+      <rect x="12" y="12" width="10" height="10" fill="#FFB900" />
+    </svg>
+  )}
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or</span>
-              </div>
-            </div>
-
-            <Card className="p-4 bg-muted/50 border-dashed">
-              <div className="space-y-3">
-                <div className="text-sm font-medium text-foreground">Demo Credentials</div>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <div>Email: demo@marketplace.com</div>
-                  <div>Quick login for testing</div>
-                </div>
-                <Button onClick={handleDemoLogin} variant="outline" className="w-full">
-                  Use Demo Login
-                </Button>
-              </div>
-            </Card>
+  {isLoading ? "Signing in..." : "Sign in with Microsoft"}
+</Button>
           </div>
 
           <div className="text-center text-xs text-muted-foreground">

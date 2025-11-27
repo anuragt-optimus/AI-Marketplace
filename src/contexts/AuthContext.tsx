@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { PublicClientApplication } from "@azure/msal-browser";
+import { msalInstance, initializeMsal } from "../utils/msalInstance";
 
 interface PartnerCenterAccount {
   id: string;
@@ -19,11 +21,12 @@ interface AuthContextType {
   selectedAccount: PartnerCenterAccount | null;
   isAuthenticated: boolean;
   hasConfiguredPartnerCenter: boolean;
+  msalInstance: PublicClientApplication;
+  isInitialized: boolean;
   login: (email: string, name: string) => void;
   logout: () => void;
   selectPartnerCenterAccount: (account: PartnerCenterAccount) => void;
 }
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
@@ -37,18 +40,32 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [selectedAccount, setSelectedAccount] = useState<PartnerCenterAccount | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // Load auth state from localStorage
-    const savedUser = localStorage.getItem("auth_user");
-    const savedAccount = localStorage.getItem("partner_center_account");
-    
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    if (savedAccount) {
-      setSelectedAccount(JSON.parse(savedAccount));
-    }
+    // Initialize MSAL and load auth state
+    const initializeAuth = async () => {
+      try {
+        // Initialize MSAL
+        await initializeMsal();
+        setIsInitialized(true);
+
+        // Load auth state from localStorage
+        const savedUser = localStorage.getItem("auth_user");
+        const savedAccount = localStorage.getItem("partner_center_account");
+        
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
+        }
+        if (savedAccount) {
+          setSelectedAccount(JSON.parse(savedAccount));
+        }
+      } catch (error) {
+        console.error("MSAL initialization error:", error);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const login = (email: string, name: string) => {
@@ -57,11 +74,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("auth_user", JSON.stringify(newUser));
   };
 
-  const logout = () => {
-    setUser(null);
-    setSelectedAccount(null);
-    localStorage.removeItem("auth_user");
-    localStorage.removeItem("partner_center_account");
+  // const logout = () => {
+  //   setUser(null);
+  //   setSelectedAccount(null);
+  //   localStorage.removeItem("auth_user");
+  //   localStorage.removeItem("partner_center_account");
+  // };
+  const logout = async () => {
+    try {
+      // Only call MSAL logout if initialized
+      if (isInitialized) {
+        await msalInstance.logoutRedirect({
+          postLogoutRedirectUri: window.location.origin + "/login",
+        });
+      }
+
+      // Clear app state
+      setUser(null);
+      setSelectedAccount(null);
+
+      // Clear cache
+      sessionStorage.clear();
+      localStorage.clear();
+    } catch (err) {
+      console.error("Logout Error:", err);
+      // Even if MSAL logout fails, clear local state
+      setUser(null);
+      setSelectedAccount(null);
+      sessionStorage.clear();
+      localStorage.clear();
+    }
   };
 
   const selectPartnerCenterAccount = (account: PartnerCenterAccount) => {
@@ -76,6 +118,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         selectedAccount,
         isAuthenticated: !!user,
         hasConfiguredPartnerCenter: !!selectedAccount,
+        msalInstance,
+        isInitialized,
         login,
         logout,
         selectPartnerCenterAccount,

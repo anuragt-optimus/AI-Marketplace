@@ -39,26 +39,33 @@ export const OfferTypeSelector = ({
           <SelectValue placeholder="Select the type of offer to create" />
         </SelectTrigger>
         <SelectContent>
-          {offerTypes.map((type) => (
-            <SelectItem key={type.value} value={type.value}>
-              <div className="flex items-center gap-2">
-                <span>{type.label}</span>
-                {type.badge === "popular" && (
-                  <Badge variant="secondary" className="text-xs">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    Popular
-                  </Badge>
-                )}
-                {type.badge === "new" && (
-                  <Badge variant="secondary" className="text-xs">
-                    <Sparkles className="h-3 w-3 mr-1" />
-                    New
-                  </Badge>
-                )}
-              </div>
-            </SelectItem>
-          ))}
-        </SelectContent>
+  {offerTypes.map((type) => (
+    <SelectItem
+      key={type.value}
+      value={type.value}
+      disabled={type.value !== "saas"} // disable all except SaaS
+    >
+      <div className="flex items-center gap-2">
+        <span>{type.label}</span>
+
+        {type.badge === "popular" && (
+          <Badge variant="secondary" className="text-xs">
+            <TrendingUp className="h-3 w-3 mr-1" />
+            Popular
+          </Badge>
+        )}
+
+        {type.badge === "new" && (
+          <Badge variant="secondary" className="text-xs">
+            <Sparkles className="h-3 w-3 mr-1" />
+            New
+          </Badge>
+        )}
+      </div>
+    </SelectItem>
+  ))}
+</SelectContent>
+
       </Select>
       {selected && (
         <p className="text-sm text-muted-foreground mt-2">

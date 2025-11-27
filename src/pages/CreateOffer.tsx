@@ -1,15 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { OfferInputForm } from "@/components/offers/OfferInputForm";
 import { GeneratingLoader } from "@/components/offers/GeneratingLoader";
+import { partnerCenterApi } from "@/services/partnerCenterApi";
+import { PublicClientApplication } from "@azure/msal-browser";
+import { msalConfig } from "@/config/authConfig";
 
 import { toast } from "@/hooks/use-toast";
+
+const msalInstance = new PublicClientApplication(msalConfig);
 
 const CreateOffer = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const initializeMSAL = async () => {
+      try {
+        await msalInstance.initialize();
+        setIsInitialized(true);
+      } catch (error) {
+        console.error("MSAL initialization error:", error);
+      }
+    };
+
+    initializeMSAL();
+  }, []);
 
   const handleGenerate = async (
   websiteUrl: string,
@@ -30,39 +49,81 @@ const CreateOffer = () => {
   }, 200);
 
   try {
+    console.log("🚀 Getting access token from MSAL...");
     
-    // Simulating offer creation (replace with real logic later)
-    const dummyOfferId = "123"; 
+    // Check if MSAL is initialized
+    if (!isInitialized) {
+      throw new Error("MSAL is not initialized yet. Please try again.");
+    }
+    
+    // Get the authenticated account
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length === 0) {
+      throw new Error("No authenticated account found. Please login first.");
+    }
 
-    // ⏳ artificial wait to match loader time
-    await new Promise(res => setTimeout(res, 3000));
+    // Get access token using MSAL
+    const tokenRequest = {
+      scopes: ["https://graph.microsoft.com/.default"],
+      account: accounts[0],
+      forceRefresh: false
+    };
+    const tokenResponse = await msalInstance.acquireTokenSilent(tokenRequest);
+    const accessToken = tokenResponse.accessToken;
+    
+    console.log("🚀 Calling API to generate SaaS offer...");
+
+    const form = new FormData();
+    form.append("partner_center_account", "string");   // change later if dynamic
+    form.append("program", "string");                  // change later if dynamic
+    form.append("offer_type", offerType);
+    form.append("offer_alias", offerAlias);
+    form.append("product_website_url", websiteUrl);
+
+    const res = await fetch(
+      "https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/generate-saas-offer",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${accessToken}`,
+          // ❗ DO NOT ADD Content-Type when sending FormData
+        },
+        body: form
+      }
+    );
+
+    if (!res.ok) throw new Error(`API failed: ${res.status}`);
+
+    const data = await res.json();
+    console.log("✅ Response:", data);
 
     clearInterval(progressInterval);
     setProgress(100);
 
     toast({
-      title: "Offer generated!",
-      description: "Redirecting you to the review screen..."
+      title: "Success",
+      description: data.message,
     });
 
-    // ⏱ Give 1s for the loader to visibly hit 100%
-    setTimeout(() => {
-      navigate(`/offer/review/${dummyOfferId}`);
-    }, 800);
-
-  } catch (error) {
-    console.error(error);
+    // optional: redirect to offer detail page
+    navigate(`/offer/review/${data.offer_id}`);
+    
+  } catch (error: any) {
     clearInterval(progressInterval);
+
+    console.error("❌ Generation failed:", error);
 
     toast({
       title: "Generation failed",
-      description: error instanceof Error ? error.message : "Unexpected error",
+      description: error?.message ?? "Unexpected error",
       variant: "destructive"
     });
 
     setIsGenerating(false);
   }
 };
+
 
 
   return (

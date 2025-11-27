@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -18,34 +19,48 @@ import OfferPublish from "./pages/OfferPublish";
 import OfferLive from "./pages/OfferLive";
 import OfferDraftCreated from "./pages/OfferDraftCreated";
 import NotFound from "./pages/NotFound";
-import { msalConfig } from "./config/authConfig";
-import { PublicClientApplication, AccountInfo } from "@azure/msal-browser";
+import { msalInstance, initializeMsal } from "./utils/msalInstance";
+import { AccountInfo } from "@azure/msal-browser";
 import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
-const msalInstance = new PublicClientApplication(msalConfig);
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
+ 
+
   useEffect(() => {
     const initMSAL = async () => {
       try {
-        await msalInstance.initialize();
+        await initializeMsal();
 
         // Check redirect response
         const response = await msalInstance.handleRedirectPromise();
         if (response && response.account) {
           setAccount(response.account);
           console.log("MSAL - Account from redirect:", response.account);
-          console.log("-------token", response.accessToken);
+          console.log("User token:", response.accessToken);
+          
         } else {
           // Check cached accounts
           const accounts = msalInstance.getAllAccounts();
           if (accounts.length > 0) {
             setAccount(accounts[0]);
             console.log("MSAL - Account from cache:", accounts[0]);
-            console.log("-------token", accounts[0].idToken);
+            
+            // Try to get a fresh token for the user
+            try {
+              const tokenRequest = {
+                scopes: ["https://graph.microsoft.com/.default"],
+                account: accounts[0],
+                forceRefresh: false
+              };
+              const tokenResponse = await msalInstance.acquireTokenSilent(tokenRequest);
+              console.log("User token:", tokenResponse.accessToken);
+            } catch (error) {
+              console.log("Silent token acquisition failed, will require login");
+            }
           }
         }
       } catch (error) {

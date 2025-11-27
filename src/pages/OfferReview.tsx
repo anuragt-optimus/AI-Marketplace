@@ -19,11 +19,14 @@ import { ResellCSPEdit } from "@/components/review/sections/editable/ResellCSPEd
 import { SupplementalContentEdit } from "@/components/review/sections/editable/SupplementalContentEdit";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { partnerCenterApi } from "@/services/partnerCenterApi";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const OfferReview = () => {
   const { offerId } = useParams();
   const navigate = useNavigate();
+  const { msalInstance, isInitialized } = useAuth();
   const [activeSection, setActiveSection] = useState<string>("");
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [offerData, setOfferData] = useState<any>({
@@ -31,6 +34,9 @@ const OfferReview = () => {
   website_url: "https://example.com",
 
   offer_setup: {
+    offerAlias: "AI Video Suite",
+    sellThroughMicrosoft: true,
+    enableTestDrive: false,
     category: "Productivity",
     publisherName: "TechLabs Inc.",
     type: "SaaS Subscription",
@@ -38,6 +44,17 @@ const OfferReview = () => {
   },
 
   properties: {
+    categories: {
+      primary: "Productivity",
+      secondary: ["AI", "Video", "Content Creation"]
+    },
+    industries: ["Technology", "Marketing", "Education"],
+    appVersion: "v1.0",
+    legalInfo: {
+      useStandardContract: true,
+      privacyPolicyUrl: "https://example.com/privacy",
+      termsOfUseUrl: "https://example.com/terms"
+    },
     sku: "AI-VIDEO-SUITE-001",
     publisherId: "PUB-123456",
     version: "v1.0",
@@ -83,6 +100,10 @@ const OfferReview = () => {
   ],
 
   technical_config: {
+    landingPageUrl: "https://example.com/landing",
+    connectionWebhook: "https://example.com/webhook",
+    entraAppId: "12345678-1234-1234-1234-123456789012",
+    entraTenantId: "87654321-4321-4321-4321-210987654321",
     integrationType: "OAuth2",
     loginUrl: "https://example.com/login",
     webhookEnabled: true,
@@ -90,17 +111,24 @@ const OfferReview = () => {
   },
 
   preview_audience: {
+    previewAudience: ["preview.user@example.com", "qa@example.com"],
     testerEmails: ["preview.user@example.com", "qa@example.com"],
     allowSandboxTesting: true,
   },
 
   resell_csp: {
+    resellThroughCSP: "all",
+    specificCSPs: [],
     availableForResellers: true,
     partnerMargin: "15%",
     contractRequired: false,
   },
 
   supplemental_content: {
+    supplementalContent: {
+      saasScenario: "fullyHosted",
+      subscriptionIds: ["12345678-1234-1234-1234-123456789012"]
+    },
     documents: [
       { name: "User Guide", url: "https://via.placeholder.com/pdf" },
       { name: "Marketing Kit", url: "https://via.placeholder.com/pdf" },
@@ -111,43 +139,194 @@ const OfferReview = () => {
   },
 });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
 
-  useEffect(() => {
-  const fetchOffer = async () => {
-    if (!offerId) {
-      toast.error("No offer ID provided");
-      navigate("/offers");
+ useEffect(() => {
+  const loadOffer = async () => {
+    // Only proceed if MSAL is initialized
+    if (!isInitialized) {
+      console.log("MSAL not initialized yet, waiting...");
       return;
     }
 
     try {
-      // const { data, error } = await supabase
-      //   .from("offers")
-      //   .select("*")
-      //   .eq("id", offerId)
-      //   .single();
+      // 1. Get account
+      const accounts = msalInstance.getAllAccounts();
+      if (!accounts.length) {
+        console.log("No accounts found");
+        return;
+      }
 
-      // if (!error && data) {
-      //   setOfferData(data);
-      // } else {
-      //   console.warn("⚠️ Supabase returned no data — using mock offer.");
-      // }
-    } catch (err) {
-      console.warn("⚠️ Supabase fetch error — using mock offer.", err);
+      // 2. Acquire token
+      const tokenResponse = await msalInstance.acquireTokenSilent({
+        scopes: ["https://graph.microsoft.com/.default"],
+        account: accounts[0],
+      });
+
+      // 3. Fetch offer from your backend
+      const res = await fetch(`https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/offers/${offerId}`, {
+        headers: {
+          Authorization: `Bearer ${tokenResponse.accessToken}`,
+          Accept: "application/json",
+        },
+      });
+
+      const raw = await res.json();
+      console.log("Fetched offer data:", raw);
+
+      // 4. Map to offerData structure
+      // Find different resource types from the API response
+      const productResource = raw.resources?.find((r: any) => r.type === "softwareAsAService");
+      const marketplaceSetup = raw.resources?.find((r: any) => r.resourceName === "marketplaceSetup");
+      const properties = raw.resources?.find((r: any) => r.resourceName === "productProperties");
+      const listing = raw.resources?.find((r: any) => r.resourceName === "mainListing");
+      const techConfig = raw.resources?.find((r: any) => r.resourceName === "technicalConfiguration");
+      const priceAvailability = raw.resources?.find((r: any) => r.resourceName === "priceAndAvailability");
+      const resellerConfig = raw.resources?.find((r: any) => r.resourceName === "resellerConfiguration");
+      
+      // Extract plans
+      const planResources = raw.resources?.filter((r: any) => r.resourceName?.includes("Plan") && !r.resourceName?.includes("Pricing") && !r.resourceName?.includes("Listing"));
+      const planListings = raw.resources?.filter((r: any) => r.resourceName?.includes("PlanListing"));
+      const planPricings = raw.resources?.filter((r: any) => r.resourceName?.includes("PlanPricing"));
+      
+      // Map plans data
+      const plans = planResources?.map((plan: any) => {
+        const listing = planListings?.find((l: any) => l.plan?.externalId === plan.identity?.externalId);
+        const pricing = planPricings?.find((p: any) => p.plan?.externalId === plan.identity?.externalId);
+        
+        return {
+          name: plan.alias || listing?.name,
+          description: listing?.description,
+          price: pricing?.pricing?.recurrentPrice?.prices?.[0]?.pricePerPaymentInUsd,
+          billingPeriod: pricing?.pricing?.recurrentPrice?.prices?.[0]?.billingTerm?.type,
+          markets: pricing?.markets,
+          features: [], // This would need to come from another source or be hardcoded
+        };
+      }) || [];
+
+      setOfferData({
+        offer_alias: productResource?.alias,
+        website_url: listing?.generalLinks?.[0]?.link,
+        
+        offer_setup: {
+          offerAlias: productResource?.alias,
+          sellThroughMicrosoft: marketplaceSetup?.sellThroughMicrosoft || false,
+          enableTestDrive: false, // This field doesn't seem to be in the API
+          category: properties?.categories?.web?.[0] || "Web",
+          publisherName: listing?.supportContact?.name || "Publisher",
+          type: productResource?.type === "softwareAsAService" ? "SaaS" : "Unknown",
+          visibility: priceAvailability?.audience || "Public",
+        },
+
+        properties: {
+          categories: {
+            primary: properties?.categories?.web?.[0] || "Web",
+            secondary: properties?.categories?.web?.slice(1) || []
+          },
+          industries: properties?.industries?.other || [],
+          appVersion: properties?.appVersion,
+          legalInfo: {
+            useStandardContract: properties?.termsConditions === "standard",
+            privacyPolicyUrl: listing?.privacyPolicyLink,
+            termsOfUseUrl: properties?.termsOfUseUrl
+          },
+          sku: productResource?.identity?.externalId,
+          publisherId: raw.product_id,
+          version: properties?.appVersion,
+          keywords: listing?.searchKeywords || [],
+          supportContact: listing?.supportContact?.email,
+          legalTerms: properties?.termsOfUse,
+        },
+
+        offer_listing: {
+          name: listing?.title,
+          searchSummary: listing?.searchResultSummary,
+          language: listing?.languageId?.replace("-", "_") || "en_us",
+          description: listing?.description,
+          gettingStartedInstructions: listing?.gettingStartedInstructions,
+          images: [], // Would need to extract from somewhere else
+          searchKeywords: listing?.searchKeywords,
+          contacts: {
+            support: listing?.supportContact,
+            engineering: listing?.engineeringContact,
+          },
+          marketingUrls: {
+            website: listing?.generalLinks?.[0]?.link,
+            privacyPolicy: listing?.privacyPolicyLink,
+            supportUrl: listing?.globalSupportWebsite,
+          },
+          generalLinks: listing?.generalLinks,
+        },
+
+        plans: plans,
+
+        technical_config: {
+          landingPageUrl: techConfig?.landingPageUrl,
+          connectionWebhook: techConfig?.connectionWebhook,
+          entraAppId: techConfig?.azureAdAppId,
+          entraTenantId: techConfig?.azureAdTenantId,
+          integrationType: "OAuth2",
+          loginUrl: techConfig?.landingPageUrl,
+          webhookEnabled: !!techConfig?.connectionWebhook,
+        },
+
+        preview_audience: {
+          previewAudience: priceAvailability?.previewAudiences?.map((p: any) => p.id) || [],
+          testerEmails: priceAvailability?.previewAudiences?.map((p: any) => p.id) || [],
+          allowSandboxTesting: true,
+        },
+
+        resell_csp: {
+          resellThroughCSP: resellerConfig?.resellerChannelState || "none",
+          specificCSPs: resellerConfig?.audiences || [],
+          availableForResellers: resellerConfig?.resellerChannelState === "all",
+          partnerMargin: "15%",
+          contractRequired: false,
+        },
+
+        supplemental_content: {
+          supplementalContent: {
+            saasScenario: "fullyHosted",
+            subscriptionIds: []
+          },
+          documents: [],
+          videos: [],
+        },
+      });
+    } catch (error) {
+      console.error("Error loading offer:", error);
+      // Continue with demo data for now
     } finally {
       setIsLoading(false);
     }
   };
 
-  fetchOffer();
-}, [offerId]);
+  loadOffer();
+}, [offerId, msalInstance, isInitialized]);
 
 
-  const handleApproveAndPublish = () => {
-    toast.success("Preparing to publish offer...");
-    navigate(`/offer/publish/${offerId}`);
+  const handleApproveAndPublish = async () => {
+    try {
+      toast.success("Preparing to publish offer...");
+      
+      // Test Partner Center API connection
+      console.log('Testing Partner Center API for publishing...');
+      
+      try {
+        // Try to get offer status from Partner Center
+        const status = await partnerCenterApi.getOfferStatus(offerId!);
+        console.log('Partner Center offer status:', status);
+      } catch (apiError) {
+        console.log('Partner Center API test failed:', apiError);
+        // Continue with demo flow for now
+      }
+      
+      navigate(`/offer/publish/${offerId}`);
+    } catch (error) {
+      console.error('Publish preparation failed:', error);
+      toast.error("Failed to prepare offer for publishing");
+    }
   };
 
   const handleEditSection = (sectionId: string, sectionName: string) => {
@@ -248,13 +427,13 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <OfferSetupEdit
-                  data={offerData.offer_setup}
+                  data={offerData.offer_setup || {}}
                   onSave={(data) => handleSaveSection('offerSetup', data)}
                   onCancel={handleCancelEdit}
                 />
               }
             >
-              <OfferSetupSection data={offerData.offer_setup} />
+              <OfferSetupSection data={offerData.offer_setup || {}} />
             </OfferSectionCard>
 
             {/* Properties */}
@@ -266,7 +445,7 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <PropertiesEdit
-                  data={offerData.properties}
+                  data={offerData.properties || {}}
                   websiteUrl={offerData.website_url}
                   offerId={offerId || ''}
                   onSave={(data) => handleSaveSection('properties', data)}
@@ -274,7 +453,7 @@ const OfferReview = () => {
                 />
               }
             >
-              <PropertiesSection data={offerData.properties} />
+              <PropertiesSection data={offerData.properties || {}} />
             </OfferSectionCard>
 
             {/* Offer Listing */}
@@ -286,7 +465,7 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <OfferListingEdit
-                  data={offerData.offer_listing}
+                  data={offerData.offer_listing || {}}
                   websiteUrl={offerData.website_url}
                   offerId={offerId || ''}
                   existingOfferData={offerData}
@@ -295,7 +474,7 @@ const OfferReview = () => {
                 />
               }
             >
-              <OfferListingSection data={offerData.offer_listing} />
+              <OfferListingSection data={offerData.offer_listing || {}} />
             </OfferSectionCard>
 
             {/* Plans & Pricing */}
@@ -368,13 +547,13 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <TechnicalConfigEdit
-                  data={offerData.technical_config}
+                  data={offerData.technical_config || {}}
                   onSave={(data) => handleSaveSection('technicalConfig', data)}
                   onCancel={handleCancelEdit}
                 />
               }
             >
-              <TechnicalConfigSection data={offerData.technical_config} />
+              <TechnicalConfigSection data={offerData.technical_config || {}} />
             </OfferSectionCard>
 
             {/* Preview Audience */}
@@ -386,13 +565,13 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <PreviewAudienceEdit
-                  data={offerData.preview_audience}
+                  data={offerData.preview_audience || {}}
                   onSave={(data) => handleSaveSection('previewAudience', data)}
                   onCancel={handleCancelEdit}
                 />
               }
             >
-              <PreviewAudienceSection data={offerData.preview_audience} />
+              <PreviewAudienceSection data={offerData.preview_audience || {}} />
             </OfferSectionCard>
 
             {/* Resell through CSPs */}
@@ -404,13 +583,13 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <ResellCSPEdit
-                  data={offerData.resell_csp}
+                  data={offerData.resell_csp || {}}
                   onSave={(data) => handleSaveSection('resellCSP', data)}
                   onCancel={handleCancelEdit}
                 />
               }
             >
-              <ResellCSPSection data={offerData.resell_csp} />
+              <ResellCSPSection data={offerData.resell_csp || {}} />
             </OfferSectionCard>
 
             {/* Supplemental Content */}
@@ -422,13 +601,13 @@ const OfferReview = () => {
               onEdit={handleEditSection}
               editComponent={
                 <SupplementalContentEdit
-                  data={{ supplementalContent: offerData.supplemental_content }}
+                  data={{ supplementalContent: offerData.supplemental_content?.supplementalContent || {} }}
                   onSave={(data) => handleSaveSection('supplementalContent', data.supplementalContent)}
                   onCancel={handleCancelEdit}
                 />
               }
             >
-              <SupplementalContentSection data={{ supplementalContent: offerData.supplemental_content }} />
+              <SupplementalContentSection data={{ supplementalContent: offerData.supplemental_content?.supplementalContent || {} }} />
             </OfferSectionCard>
           </div>
         </div>
