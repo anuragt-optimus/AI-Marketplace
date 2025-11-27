@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 13% 18%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 18%;
+
+    /* Optimus Red as primary */
+    --primary: 3 86% 58%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Optimus Gray for secondary */
+    --secondary: 210 4% 74%;
+    --secondary-foreground: 220 13% 18%;
+
+    --muted: 210 13% 96%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 246 55% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 3 86% 58%;
+
+    --radius: 0.5rem;
+    
+    /* Custom tokens */
+    --sidebar-bg: 0 0% 98%;
+    --sidebar-border: 220 13% 91%;
+    --nav-hover: 210 13% 96%;
+    --badge-new: 0 0% 95%;
+    --badge-ai: 282 83% 95%;
+    --status-draft: 45 93% 47%;
+    --status-generating: 217 91% 60%;
+    --status-ready: 142 76% 36%;
+    --status-submitted: 25 95% 53%;
+    --status-preview: 271 81% 56%;
+    --status-certification: 24 10% 50%;
+    --status-published: 142 71% 45%;
+    --status-failed: 0 84% 60%;
+    
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 220 13% 9%;
+    --foreground: 210 13% 96%;
+
+    --card: 220 13% 12%;
+    --card-foreground: 210 13% 96%;
+
+    --popover: 220 13% 12%;
+    --popover-foreground: 210 13% 96%;
+
+    --primary: 3 86% 58%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 13% 18%;
+    --secondary-foreground: 210 13% 96%;
+
+    --muted: 220 13% 18%;
+    --muted-foreground: 220 9% 65%;
+
+    --accent: 246 55% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 18%;
+    --input: 220 13% 18%;
+    --ring: 3 86% 58%;
+    
+    --sidebar-bg: 220 13% 9%;
+    --sidebar-border: 220 13% 18%;
+    --nav-hover: 220 13% 15%;
+    --badge-new: 220 13% 18%;
+    --badge-ai: 246 55% 20%;
+    --status-draft: 45 93% 47%;
+    --status-generating: 217 91% 60%;
+    --status-ready: 142 76% 36%;
+    --status-submitted: 25 95% 53%;
+    --status-preview: 271 81% 56%;
+    --status-certification: 24 10% 50%;
+    --status-published: 142 71% 45%;
+    --status-failed: 0 84% 60%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
