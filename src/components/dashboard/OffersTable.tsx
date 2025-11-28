@@ -55,128 +55,7 @@ interface Offer {
 }
 
 // Hardcoded dummy data for demonstration purposes
-const DUMMY_OFFERS: Offer[] = [
-  {
-    id: 'demo-001',
-    listing_title: 'CloudSync Pro',
-    status: 'published',
-    offer_type: 'SaaS',
-    partner_center_id: 'cs-prod-2024-001',
-    created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
-    error_message: null,
-  },
-  {
-    id: 'demo-002',
-    listing_title: 'DataVault Enterprise',
-    status: 'published',
-    offer_type: 'Azure App',
-    partner_center_id: 'dv-ent-2024-045',
-    created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    error_message: null,
-  },
-  {
-    id: 'demo-003',
-    listing_title: 'Analytics Dashboard Plus',
-    status: 'published',
-    offer_type: 'SaaS',
-    partner_center_id: 'adp-saas-2024-128',
-    created_at: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    error_message: null,
-  },
-  {
-    id: 'demo-004',
-    listing_title: 'ProjectHub Workspace',
-    status: 'submitted',
-    offer_type: 'SaaS',
-    partner_center_id: null,
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    error_message: null,
-  },
-  {
-    id: 'demo-005',
-    listing_title: 'AI Content Generator',
-    status: 'in_preview',
-    offer_type: 'SaaS',
-    partner_center_id: null,
-    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    error_message: null,
-  },
-  {
-    id: 'demo-006',
-    listing_title: 'TeamCollab Suite',
-    status: 'in_certification',
-    offer_type: 'Azure App',
-    partner_center_id: null,
-    created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    error_message: null,
-  },
-  {
-    id: 'demo-007',
-    listing_title: 'SecureAuth Manager',
-    status: 'ready_to_publish',
-    offer_type: 'SaaS',
-    partner_center_id: null,
-    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    error_message: null,
-  },
-  {
-    id: 'demo-008',
-    listing_title: 'CustomerFlow CRM',
-    status: 'draft',
-    offer_type: 'SaaS',
-    partner_center_id: null,
-    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    error_message: null,
-  },
-  {
-    id: 'demo-009',
-    listing_title: null,
-    status: 'draft',
-    offer_type: 'Azure App',
-    partner_center_id: null,
-    created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-    error_message: null,
-  },
-  {
-    id: 'demo-010',
-    listing_title: 'Inventory Master',
-    status: 'generating',
-    offer_type: 'SaaS',
-    partner_center_id: null,
-    created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    error_message: null,
-  },
-  {
-    id: 'demo-011',
-    listing_title: 'PaymentPro Gateway',
-    status: 'failed',
-    offer_type: 'SaaS',
-    partner_center_id: null,
-    created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    error_message: 'Invalid webhook URL provided. Please check your configuration.',
-  },
-  {
-    id: 'demo-012',
-    listing_title: 'DocuSign Connector',
-    status: 'failed',
-    offer_type: 'Azure App',
-    partner_center_id: null,
-    created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-    error_message: 'Missing required legal documentation and privacy policy.',
-  },
-];
+
 
 export const OffersTable = () => {
   const navigate = useNavigate();
@@ -226,7 +105,7 @@ export const OffersTable = () => {
 
   useEffect(() => {
     if (showDummyData) {
-      calculateCounts(DUMMY_OFFERS);
+     
     } else {
       calculateCounts(offers);
     }
@@ -279,10 +158,50 @@ export const OffersTable = () => {
         const mainListing = offer.resources?.find((r: any) => r.resourceName === "mainListing");
         const productResource = offer.resources?.find((r: any) => r.type === "softwareAsAService");
         
+        // Log the original status for debugging
+        console.log(`Offer ${offer.id} - Original status: "${offer.status}", Converted: "${offer.status.toLowerCase()}"`);
+        
+        // Map API statuses to our expected statuses
+        const mapStatus = (apiStatus: string): string => {
+          const status = apiStatus.toLowerCase();
+          
+          // Direct mappings
+          const statusMappings: Record<string, string> = {
+            'draft': 'draft',
+            'generating': 'generating', 
+            'ready_to_review': 'ready_to_review',
+            'ready_to_publish': 'ready_to_publish',
+            'submitted': 'submitted',
+            'in_preview': 'in_preview',
+            'preview': 'in_preview',
+            'in_certification': 'in_certification',
+            'certification': 'in_certification',
+            'published': 'published',
+            'live': 'published',
+            'failed': 'failed',
+            'error': 'failed',
+            'rejected': 'failed',
+            // Add more mappings as needed
+            'in_progress': 'submitted', // Assuming in_progress means submitted
+            'pending': 'submitted',
+            'reviewing': 'in_certification',
+            'validating': 'submitted',
+            'approved': 'published',
+          };
+          
+          const mappedStatus = statusMappings[status];
+          if (!mappedStatus) {
+            console.warn(`Unknown status "${apiStatus}" for offer ${offer.id}, defaulting to draft`);
+            return 'draft';
+          }
+          
+          return mappedStatus;
+        };
+        
         return {
           id: offer.id,
           listing_title: mainListing?.title || productResource?.alias || null,
-          status: offer.status.toLowerCase(), // Convert to lowercase to match our statuses
+          status: mapStatus(offer.status),
           offer_type: productResource?.type === "softwareAsAService" ? "SaaS" : "Unknown",
           partner_center_id: offer.product_id || null,
           created_at: offer.created_at,
@@ -296,6 +215,10 @@ export const OffersTable = () => {
 
       setOffers(transformedOffers);
       calculateCounts(transformedOffers);
+      
+      // Additional debug info
+      console.log("Transformed offers:", transformedOffers);
+      console.log("Status summary:", transformedOffers.map(offer => ({ id: offer.id, status: offer.status })));
     } catch (error) {
       console.error("Error fetching offers:", error);
       toast.error("Failed to load offers");
@@ -329,7 +252,7 @@ export const OffersTable = () => {
 
   const applyFilters = () => {
     // Use dummy data if toggle is on, otherwise use real offers
-    let filtered = showDummyData ? [...DUMMY_OFFERS] : [...offers];
+    let filtered = showDummyData ? [] : [...offers];
 
     // Apply tab filter
     if (activeTab !== "all") {
@@ -497,7 +420,7 @@ export const OffersTable = () => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 window.open(
-                                  `https://partner.microsoft.com/dashboard/marketplace-offers/${offer.partner_center_id}`,
+                                  `https://partner.microsoft.com/en-us/dashboard/commercial-marketplace/offers/${offer.product_id.replace("product/", "")}/overview`,
                                   "_blank"
                                 );
                               }}

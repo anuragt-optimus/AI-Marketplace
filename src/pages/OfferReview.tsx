@@ -66,13 +66,26 @@ const OfferReview = () => {
   offer_listing: {
     name: "AI Video Generator",
     summary: "Turn any text into a realistic video with avatars.",
+    searchSummary: "Turn any text into a realistic video with avatars.",
     language: "English",
-    longDescription:
-      "AI Video Generator allows users to create professional talking videos using realistic AI avatars and voices. Ideal for education, marketing, and enterprise training.",
+    description: "AI Video Generator allows users to create professional talking videos using realistic AI avatars and voices. Ideal for education, marketing, and enterprise training.",
+    longDescription: "AI Video Generator allows users to create professional talking videos using realistic AI avatars and voices. Ideal for education, marketing, and enterprise training.",
+    gettingStartedInstructions: "",
     images: [
       { type: "logo", url: "https://via.placeholder.com/200" },
       { type: "banner", url: "https://via.placeholder.com/600x200" },
     ],
+    searchKeywords: [],
+    contacts: {
+      support: {},
+      engineering: {},
+    },
+    marketingUrls: {
+      website: "",
+      privacyPolicy: "",
+      supportUrl: "",
+    },
+    generalLinks: [],
   },
 
   plans: [
@@ -140,6 +153,7 @@ const OfferReview = () => {
 });
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
 
  useEffect(() => {
@@ -208,6 +222,11 @@ const OfferReview = () => {
       setOfferData({
         offer_alias: productResource?.alias,
         website_url: listing?.generalLinks?.[0]?.link,
+        product_id: raw.product_id, // Add product_id at the top level
+        job_id: raw.job_id, // Add job_id at the top level
+        created_at: raw.created_at, // Add created_at at the top level
+        updated_at: raw.updated_at, // Add updated_at at the top level
+        status: raw.status, // Add status at the top level
         
         offer_setup: {
           offerAlias: productResource?.alias,
@@ -240,23 +259,25 @@ const OfferReview = () => {
         },
 
         offer_listing: {
-          name: listing?.title,
-          searchSummary: listing?.searchResultSummary,
+          name: listing?.title || "Untitled Offer",
+          summary: listing?.searchResultSummary || "",
+          searchSummary: listing?.searchResultSummary || "",
           language: listing?.languageId?.replace("-", "_") || "en_us",
-          description: listing?.description,
-          gettingStartedInstructions: listing?.gettingStartedInstructions,
+          description: listing?.description || "",
+          longDescription: listing?.description || "",
+          gettingStartedInstructions: listing?.gettingStartedInstructions || "",
           images: [], // Would need to extract from somewhere else
-          searchKeywords: listing?.searchKeywords,
+          searchKeywords: listing?.searchKeywords || [],
           contacts: {
-            support: listing?.supportContact,
-            engineering: listing?.engineeringContact,
+            support: listing?.supportContact || {},
+            engineering: listing?.engineeringContact || {},
           },
           marketingUrls: {
-            website: listing?.generalLinks?.[0]?.link,
-            privacyPolicy: listing?.privacyPolicyLink,
-            supportUrl: listing?.globalSupportWebsite,
+            website: listing?.generalLinks?.[0]?.link || "",
+            privacyPolicy: listing?.privacyPolicyLink || "",
+            supportUrl: listing?.globalSupportWebsite || "",
           },
-          generalLinks: listing?.generalLinks,
+          generalLinks: listing?.generalLinks || [],
         },
 
         plans: plans,
@@ -345,6 +366,46 @@ const OfferReview = () => {
       
       if (result.job_status === 'running') {
         toast(`Submitting offer to Partner Center...`);
+        
+        // Update offer status to "in_progress" after successful submission
+        try {
+          // Convert current offer data to API format with status "in_progress"
+          const apiPayload = await convertToApiFormat({...offerData, status: 'in_progress'});
+          apiPayload.status = "in_progress";
+
+          console.log('Updating offer status to in_progress with payload:',  JSON.stringify(apiPayload));
+          
+          // Send PUT request to update the offer status
+          const updateResponse = await fetch(
+            `https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/offers/${offerId}`,
+            {
+              method: 'PUT',
+              headers: {
+                'accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenResponse.accessToken}`,
+              },
+              body: JSON.stringify(apiPayload)
+            }
+          );
+
+          if (updateResponse.ok) {
+            const updateResult = await updateResponse.json();
+            console.log('Offer status updated to in_progress:', updateResult);
+            
+            // Update local state to reflect the status change
+            setOfferData((prev: any) => ({
+              ...prev,
+              status: 'in_progress'
+            }));
+          } else {
+            console.warn('Failed to update offer status to in_progress');
+          }
+        } catch (statusUpdateError) {
+          console.error('Error updating offer status:', statusUpdateError);
+          // Don't fail the whole process if status update fails
+        }
+        
         navigate(`/offer/publish/${offerId}`);
       } else {
         toast.error(`Submission failed: ${result.message || 'Unknown error'}`);
@@ -373,26 +434,181 @@ const OfferReview = () => {
       'supplementalContent': 'supplemental_content'
     };
 
+    setIsSaving(true); // Start loading
+    
     try {
       const columnName = columnMap[sectionId];
-      // const { error } = await supabase
-      //   .from('offers')
-      //   .update({ [columnName]: updatedData })
-      //   .eq('id', offerId);
-
-      // if (error) throw error;
-
-      setOfferData((prev: any) => ({
-        ...prev,
+      
+      // Update local state first
+      const updatedOfferData = {
+        ...offerData,
         [columnName]: updatedData
-      }));
+      };
+      
+      setOfferData(updatedOfferData);
+
+      // Convert updated offer data to API format
+      const apiPayload = await convertToApiFormat(updatedOfferData);
+      
+      // Get authentication token
+      const accounts = msalInstance.getAllAccounts();
+      if (!accounts.length) {
+        toast.error("No authenticated account found");
+        return;
+      }
+
+      const tokenResponse = await msalInstance.acquireTokenSilent({
+        scopes: ["https://graph.microsoft.com/.default"],
+        account: accounts[0],
+      });
+
+      // Send PUT request to update the offer
+      const response = await fetch(
+        `https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/offers/${offerId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokenResponse.accessToken}`,
+          },
+          body: JSON.stringify(apiPayload)
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Update offer result:', result);
 
       toast.success("Changes saved successfully");
       setEditingSection(null);
     } catch (error) {
       console.error('Error saving:', error);
       toast.error("Failed to save changes");
+    } finally {
+      setIsSaving(false); // End loading
     }
+  };
+
+  // Helper function to convert internal offer data to API format
+  const convertToApiFormat = async (data: any) => {
+    // Get the original offer data to preserve structure and IDs
+    const originalData = offerData;
+    console.log('-------------Converting to API format. Original data:', originalData.product_id);
+    
+    return {
+      "$schema": "https://schema.mp.microsoft.com/schema/configure/2022-03-01-preview2",
+      "id": offerId,
+      "partner_center_account": "string",
+      "resources": [
+        {
+          "$schema": "https://schema.mp.microsoft.com/schema/product/2022-03-01-preview3",
+          "resourceName": "mySaaSProduct",
+          "identity": {
+            "externalId": data.properties?.sku || data.offer_setup?.offerAlias || "default-sku"
+          },
+          "type": "softwareAsAService",
+          "alias": data.offer_setup?.offerAlias || "default-alias"
+        },
+        {
+          "$schema": "https://schema.mp.microsoft.com/schema/commercial-marketplace-setup/2022-03-01-preview2",
+          "resourceName": "marketplaceSetup",
+          "product": data.product_id || "product/default",
+          "sellThroughMicrosoft": data.offer_setup?.sellThroughMicrosoft || true
+        },
+        {
+          "$schema": "https://schema.mp.microsoft.com/schema/property/2022-03-01-preview5",
+          "resourceName": "productProperties",
+          "product": data.product_id || "product/default",
+          "kind": "azureSaaS",
+          "termsConditions": data.properties?.legalInfo?.useStandardContract ? "standard" : "custom",
+          "termsOfUseUrl": data.properties?.legalInfo?.termsOfUseUrl || "https://www.yourcompany.com/legal/terms-of-use",
+          "termsOfUse": data.properties?.legalTerms || "Your custom terms and conditions text goes here.",
+          "categories": {
+            "web": [data.properties?.categories?.primary || "web"]
+          },
+          "industries": {},
+          "appVersion": data.properties?.appVersion || "1.0.0"
+        },
+        {
+          "$schema": "https://schema.mp.microsoft.com/schema/listing/2022-03-01-preview5",
+          "resourceName": "mainListing",
+          "kind": "azureSaaS",
+          "product": data.product_id || "product/default",
+          "languageId": data.offer_listing?.language?.replace("_", "-") || "en-us",
+          "title": data.offer_listing?.name || "Untitled Offer",
+          "searchResultSummary": data.offer_listing?.summary || data.offer_listing?.searchSummary || "",
+          "description": data.offer_listing?.description || data.offer_listing?.longDescription || "",
+          "gettingStartedInstructions": data.offer_listing?.gettingStartedInstructions || "",
+          "searchKeywords": data.offer_listing?.searchKeywords || data.properties?.keywords || ["saas", "web", "cloud"],
+          "supportContact": {
+            "name": data.offer_listing?.contacts?.support?.name || "Support Team",
+            "email": data.offer_listing?.contacts?.support?.email || data.properties?.supportContact || "support@yourcompany.com",
+            "phone": data.offer_listing?.contacts?.support?.phone || "+1-800-123-4567",
+            "url": data.offer_listing?.contacts?.support?.url || "https://yourcompany.com/support"
+          },
+          "engineeringContact": {
+            "name": data.offer_listing?.contacts?.engineering?.name || "Engineering Team",
+            "email": data.offer_listing?.contacts?.engineering?.email || "engineering@yourcompany.com",
+            "phone": data.offer_listing?.contacts?.engineering?.phone || "+1-800-123-4568"
+          },
+          "generalLinks": data.offer_listing?.generalLinks || [
+            {
+              "displayText": "Company Website",
+              "link": data.offer_listing?.marketingUrls?.website || data.website_url || "https://www.optimusinfo.com/"
+            },
+            {
+              "displayText": "Documentation",
+              "link": "https://docs.yourcompany.com"
+            }
+          ],
+          "privacyPolicyLink": data.offer_listing?.marketingUrls?.privacyPolicy || data.properties?.legalInfo?.privacyPolicyUrl || "https://yourcompany.com/legal/privacy",
+          "globalSupportWebsite": data.offer_listing?.marketingUrls?.supportUrl || data.website_url || "https://www.optimusinfo.com/"
+        },
+        {
+          "$schema": "https://schema.mp.microsoft.com/schema/software-as-a-service-technical-configuration/2022-03-01-preview3",
+          "resourceName": "technicalConfiguration",
+          "product": data.product_id || "product/default",
+          "landingPageUrl": data.technical_config?.landingPageUrl || "https://yourcompany.com/landing",
+          "connectionWebhook": data.technical_config?.connectionWebhook || "https://yourcompany.com/api/webhook",
+          "azureAdTenantId": data.technical_config?.entraTenantId || "00000000-0000-0000-0000-000000000000",
+          "azureAdAppId": data.technical_config?.entraAppId || "00000000-0000-0000-0000-000000000000"
+        },
+        {
+          "$schema": "https://schema.mp.microsoft.com/schema/price-and-availability-offer/2022-03-01-preview3",
+          "resourceName": "priceAndAvailability",
+          "product": data.product_id || "product/default",
+          "previewAudiences": data.preview_audience?.previewAudience?.map((email: string) => ({
+            "type": "email",
+            "id": email,
+            "label": `Preview User: ${email}`
+          })) || [
+            {
+              "type": "email",
+              "id": "user@example.com",
+              "label": "Preview User 1"
+            }
+          ]
+        },
+        {
+          "$schema": "https://schema.mp.microsoft.com/schema/reseller/2022-03-01-preview2",
+          "resourceName": "resellerConfiguration",
+          "product": data.product_id || "product/default",
+          "resellerChannelState": data.resell_csp?.resellThroughCSP === "all" ? "all" : 
+                                  data.resell_csp?.resellThroughCSP === "none" ? "none" : 
+                                  data.resell_csp?.resellThroughCSP === "specific" ? "some" : "none",
+          "audiences": data.resell_csp?.resellThroughCSP === "specific" ? (data.resell_csp?.specificCSPs || []) : []
+        }
+      ],
+      "product_id": data.product_id || "product/default",
+      "job_id": data.job_id || "default-job-id",
+      "created_at": data.created_at || new Date().toISOString(),
+      "updated_at": new Date().toISOString(),
+      "status": "Draft"
+    };
   };
 
   const handleCancelEdit = () => {
@@ -450,15 +666,7 @@ const OfferReview = () => {
               sectionId="offerSetup"
               title="Offer Setup"
               isActive={activeSection === "offerSetup"}
-              isEditing={editingSection === "offerSetup"}
-              onEdit={handleEditSection}
-              editComponent={
-                <OfferSetupEdit
-                  data={offerData.offer_setup || {}}
-                  onSave={(data) => handleSaveSection('offerSetup', data)}
-                  onCancel={handleCancelEdit}
-                />
-              }
+              isEditing={false}
             >
               <OfferSetupSection data={offerData.offer_setup || {}} />
             </OfferSectionCard>
@@ -477,6 +685,7 @@ const OfferReview = () => {
                   offerId={offerId || ''}
                   onSave={(data) => handleSaveSection('properties', data)}
                   onCancel={handleCancelEdit}
+                  isSaving={isSaving}
                 />
               }
             >
@@ -620,7 +829,7 @@ const OfferReview = () => {
             </OfferSectionCard>
 
             {/* Supplemental Content */}
-            <OfferSectionCard
+            {/* <OfferSectionCard
               sectionId="supplementalContent"
               title="Supplemental Content"
               isActive={activeSection === "supplementalContent"}
@@ -635,7 +844,7 @@ const OfferReview = () => {
               }
             >
               <SupplementalContentSection data={{ supplementalContent: offerData.supplemental_content?.supplementalContent || {} }} />
-            </OfferSectionCard>
+            </OfferSectionCard> */}
           </div>
         </div>
       </div>

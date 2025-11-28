@@ -115,8 +115,7 @@ const CreateOffer = () => {
     console.error("❌ Generation failed:", error);
 
     toast({
-      title: "Generation failed",
-      description: error?.message ?? "Unexpected error",
+      title: "You are not authorized to create an offer.",
       variant: "destructive"
     });
 

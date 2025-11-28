@@ -76,7 +76,29 @@ interface OfferStatusBadgeProps {
 }
 
 export const OfferStatusBadge = ({ status, className }: OfferStatusBadgeProps) => {
-  const config = statusConfig[status as OfferStatus] || statusConfig.draft;
+  const config = statusConfig[status as OfferStatus];
+  
+  // Handle unknown statuses
+  if (!config) {
+    console.warn(`Unknown status: "${status}" - using default draft config`);
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className={cn("inline-flex items-center gap-1.5", className)}>
+              <Badge variant="outline" className="font-medium bg-yellow-50 text-yellow-700 border-yellow-200">
+                {status || 'Unknown'}
+              </Badge>
+              <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs">
+            <p className="text-sm">Unknown status: {status}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
 
   return (
     <TooltipProvider>

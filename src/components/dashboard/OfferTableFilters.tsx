@@ -25,7 +25,7 @@ const filterTabs: FilterTabConfig[] = [
   {
     label: "In Progress",
     value: "in_progress",
-    statuses: ["submitted", "in_preview", "in_certification"],
+    statuses: ["submitted", "in_preview", "in_certification", "in_progress"],
   },
   {
     label: "Published",

@@ -10,7 +10,7 @@ interface OfferSectionCardProps {
   editComponent?: ReactNode;
   isActive: boolean;
   isEditing?: boolean;
-  onEdit: (sectionId: string, sectionName: string) => void;
+  onEdit?: (sectionId: string, sectionName: string) => void;
   className?: string;
 }
 
@@ -35,7 +35,7 @@ export const OfferSectionCard = ({
     >
       <CardHeader className="relative">
         <CardTitle className="text-lg text-foreground">{title}</CardTitle>
-        {!isEditing && (
+        {!isEditing && onEdit && (
           <InlineAIButton
             sectionId={sectionId}
             sectionName={title}

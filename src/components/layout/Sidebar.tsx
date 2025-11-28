@@ -11,9 +11,9 @@ export const Sidebar = ({ userRole = "customer" }: SidebarProps) => {
     { icon: Home, label: "Dashboard", path: "/" },
     { icon: Plus, label: "Create New Offer", path: "/create" },
     { icon: Tag, label: "My Offers", path: "/offers" },
-    { icon: Tag, label: "Private Offers", path: "/private-offers" },
-    { icon: ShoppingCart, label: "Orders", path: "/orders" },
-    { icon: Settings, label: "Settings", path: "/settings" },
+    { icon: Tag, label: "Private Offers", path: "/private-offers", disabled: true },
+    { icon: ShoppingCart, label: "Orders", path: "/orders", disabled: true },
+    { icon: Settings, label: "Settings", path: "/settings", disabled: true },
   ];
 
   const internalItems = [
@@ -26,9 +26,15 @@ export const Sidebar = ({ userRole = "customer" }: SidebarProps) => {
         {navItems.map((item) => (
           <NavLink
             key={item.path}
-            to={item.path}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-nav-hover hover:text-foreground transition-colors"
-            activeClassName="bg-nav-hover text-foreground"
+            to={item.disabled ? "#" : item.path}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+              item.disabled
+                ? "text-muted-foreground/50 cursor-not-allowed"
+                : "text-muted-foreground hover:bg-nav-hover hover:text-foreground"
+            )}
+            activeClassName={item.disabled ? "" : "bg-nav-hover text-foreground"}
+            onClick={item.disabled ? (e) => e.preventDefault() : undefined}
           >
             <item.icon className="h-5 w-5" />
             <span>{item.label}</span>

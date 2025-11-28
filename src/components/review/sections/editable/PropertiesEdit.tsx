@@ -6,10 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { PRIMARY_CATEGORIES, INDUSTRIES } from "@/constants/partnerCenterCategories";
 import { AISelectField } from "@/components/review/AISelectField";
-import { AILegalDocGenerator } from "@/components/review/AILegalDocGenerator";
 
 interface PropertiesEditProps {
   data: {
@@ -26,9 +25,10 @@ interface PropertiesEditProps {
   offerId: string;
   onSave: (data: any) => void;
   onCancel: () => void;
+  isSaving?: boolean;
 }
 
-export const PropertiesEdit = ({ data, websiteUrl, offerId, onSave, onCancel }: PropertiesEditProps) => {
+export const PropertiesEdit = ({ data, websiteUrl, offerId, onSave, onCancel, isSaving = false }: PropertiesEditProps) => {
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
       categories: {
@@ -147,31 +147,26 @@ export const PropertiesEdit = ({ data, websiteUrl, offerId, onSave, onCancel }: 
         </div>
         <div className="space-y-2">
           <Label htmlFor="privacyPolicyUrl">Privacy Policy URL</Label>
-          <AILegalDocGenerator
-            type="privacy-policy"
-            websiteUrl={websiteUrl}
-            currentUrl={watch("legalInfo.privacyPolicyUrl")}
-            onGenerated={(url) => setValue("legalInfo.privacyPolicyUrl", url)}
-          />
           <Input id="privacyPolicyUrl" {...register("legalInfo.privacyPolicyUrl")} placeholder="https://..." />
         </div>
         <div className="space-y-2">
           <Label htmlFor="termsOfUseUrl">Terms of Use URL</Label>
-          <AILegalDocGenerator
-            type="terms-of-use"
-            websiteUrl={websiteUrl}
-            currentUrl={watch("legalInfo.termsOfUseUrl")}
-            onGenerated={(url) => setValue("legalInfo.termsOfUseUrl", url)}
-          />
           <Input id="termsOfUseUrl" {...register("legalInfo.termsOfUseUrl")} placeholder="https://..." />
         </div>
       </div>
 
       <div className="flex gap-2 pt-4 border-t">
-        <Button type="submit" size="sm">
-          Save Changes
+        <Button type="submit" size="sm" disabled={isSaving}>
+          {isSaving ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            "Save Changes"
+          )}
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={onCancel}>
+        <Button type="button" variant="outline" size="sm" onClick={onCancel} disabled={isSaving}>
           Cancel
         </Button>
       </div>
