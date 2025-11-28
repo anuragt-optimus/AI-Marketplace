@@ -117,7 +117,7 @@ export const OfferInputForm = ({ onGenerate }: OfferInputFormProps) => {
               <span className="text-sm text-muted-foreground">
                 {files.length > 0
                   ? `${files.length} file(s) selected`
-                  : "Click to upload product brochures, specs, etc."}
+                  : "only pdf/doc allowed"}
               </span>
               <input
                 id="files"
