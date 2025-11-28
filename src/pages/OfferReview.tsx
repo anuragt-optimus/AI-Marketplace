@@ -49,13 +49,13 @@ const OfferReview = () => {
       primary: "Productivity",
       secondary: ["AI", "Video", "Content Creation"]
     },
-    industries: ["Technology", "Marketing", "Education"],
     appVersion: "v1.0",
     legalInfo: {
       useStandardContract: true,
       privacyPolicyUrl: "https://example.com/privacy",
       termsOfUseUrl: "https://example.com/terms"
     },
+    standardContractAmendment: "This is a sample standard contract amendment text.",
     sku: "AI-VIDEO-SUITE-001",
     publisherId: "PUB-123456",
     version: "v1.0",
@@ -245,13 +245,13 @@ const OfferReview = () => {
             primary: properties?.categories?.web?.[0] || "Web",
             secondary: properties?.categories?.web?.slice(1) || []
           },
-          industries: properties?.industries?.other || [],
           appVersion: properties?.appVersion,
           legalInfo: {
-            useStandardContract: properties?.termsConditions === "standard",
+            useStandardContract: properties?.termsConditions === "standardMicrosoft" || properties?.termsConditions === "standard",
             privacyPolicyUrl: listing?.privacyPolicyLink,
             termsOfUseUrl: properties?.termsOfUseUrl
           },
+          standardContractAmendment: properties?.standardContractAmendment || "",
           sku: productResource?.identity?.externalId,
           publisherId: raw.product_id,
           version: properties?.appVersion,
@@ -541,13 +541,13 @@ const OfferReview = () => {
           "resourceName": "productProperties",
           "product": data.product_id || "product/default",
           "kind": "azureSaaS",
-          "termsConditions": data.properties?.legalInfo?.useStandardContract ? "standard" : "custom",
+          "termsConditions": data.properties?.legalInfo?.useStandardContract ? "standardMicrosoft" : "custom",
+          "standardContractAmendment": data.properties?.legalInfo?.useStandardContract ? (data.properties?.standardContractAmendment || "") : undefined,
           "termsOfUseUrl": data.properties?.legalInfo?.termsOfUseUrl || "https://www.yourcompany.com/legal/terms-of-use",
           "termsOfUse": data.properties?.legalTerms || "Your custom terms and conditions text goes here.",
           "categories": {
             "web": [data.properties?.categories?.primary || "web"]
           },
-          "industries": {},
           "appVersion": data.properties?.appVersion || "1.0.0"
         },
         {
