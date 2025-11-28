@@ -4,8 +4,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles, RefreshCw, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AITextFieldProps {
   fieldName: string;
@@ -41,34 +41,61 @@ export const AITextField = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [hasGenerated, setHasGenerated] = useState(false);
+  const { msalInstance } = useAuth();
 
   const handleGenerate = async (isRegenerate: boolean = false) => {
-    if (!websiteUrl) {
-      toast.error("Website URL is required for AI generation");
+    if (!value && isRegenerate) {
+      toast.error("No content to regenerate");
       return;
     }
 
     setIsGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('regenerate-field', {
-        body: {
-          offerId,
-          websiteUrl,
-          section,
-          fieldName,
-          currentValue: isRegenerate ? value : null,
-          userFeedback: feedback || null,
-          existingOfferData
-        }
+      // Get authentication token
+      const accounts = msalInstance.getAllAccounts();
+      if (!accounts.length) {
+        toast.error("No authenticated account found");
+        return;
+      }
+
+      const tokenResponse = await msalInstance.acquireTokenSilent({
+        scopes: ["https://graph.microsoft.com/.default"],
+        account: accounts[0],
       });
 
-      if (error) throw error;
+      // Prepare the API request
+      const requestBody = {
+        current_text: isRegenerate ? value : (placeholder || `Generate ${label.toLowerCase()}`),
+        prompt: isRegenerate ? (feedback || "regenerate") : `generate ${label.toLowerCase()}`
+      };
 
-      if (data?.generatedValue) {
-        onChange(data.generatedValue);
+      const response = await fetch(
+        'https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/ai/regenerate',
+        {
+          method: 'POST',
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokenResponse.accessToken}`,
+          },
+          body: JSON.stringify(requestBody)
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('AI regeneration result:', result);
+
+      if (result.success && result.regenerated_text) {
+        onChange(result.regenerated_text);
         setHasGenerated(true);
         setFeedback("");
-        toast.success(`${label} generated successfully`);
+        toast.success(`${label} ${isRegenerate ? 'regenerated' : 'generated'} successfully`);
+      } else {
+        throw new Error(result.message || 'Failed to generate content');
       }
     } catch (error) {
       console.error('AI generation error:', error);

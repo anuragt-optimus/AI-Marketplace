@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles, Loader2, Download, Copy, Check } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AILegalDocGeneratorProps {
   type: 'privacy-policy' | 'terms-of-use';
@@ -23,6 +23,7 @@ export const AILegalDocGenerator = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState("");
   const [isCopied, setIsCopied] = useState(false);
+  const { msalInstance } = useAuth();
 
   const docType = type === 'privacy-policy' ? 'Privacy Policy' : 'Terms of Use';
 
@@ -33,23 +34,49 @@ export const AILegalDocGenerator = ({
         ? `Generate a comprehensive Privacy Policy for a SaaS application. Include sections on: data collection, usage, storage, sharing, user rights, cookies, GDPR compliance, CCPA compliance, contact information. Make it professional and legally sound. Website: ${websiteUrl}`
         : `Generate comprehensive Terms of Use for a SaaS application. Include sections on: acceptable use, user obligations, intellectual property, disclaimers, limitations of liability, termination, governing law, dispute resolution. Make it professional and legally sound. Website: ${websiteUrl}`;
 
-      const { data, error } = await supabase.functions.invoke('regenerate-field', {
-        body: {
-          offerId: '',
-          websiteUrl,
-          section: 'legal',
-          fieldName: type,
-          currentValue: null,
-          userFeedback: prompt,
-          existingOfferData: null
-        }
+      // Get authentication token
+      const accounts = msalInstance.getAllAccounts();
+      if (!accounts.length) {
+        toast.error("No authenticated account found");
+        return;
+      }
+
+      const tokenResponse = await msalInstance.acquireTokenSilent({
+        scopes: ["https://graph.microsoft.com/.default"],
+        account: accounts[0],
       });
 
-      if (error) throw error;
+      // Prepare the API request
+      const requestBody = {
+        current_text: `Generate ${docType}`,
+        prompt: prompt
+      };
 
-      if (data?.generatedValue) {
-        setGeneratedContent(data.generatedValue);
+      const response = await fetch(
+        'https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/ai/regenerate',
+        {
+          method: 'POST',
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokenResponse.accessToken}`,
+          },
+          body: JSON.stringify(requestBody)
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Legal doc generation result:', result);
+
+      if (result.success && result.regenerated_text) {
+        setGeneratedContent(result.regenerated_text);
         toast.success(`${docType} generated successfully`);
+      } else {
+        throw new Error(result.message || 'Failed to generate document');
       }
     } catch (error) {
       console.error('Legal doc generation error:', error);
