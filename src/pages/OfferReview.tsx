@@ -19,6 +19,7 @@ import { ResellCSPEdit } from "@/components/review/sections/editable/ResellCSPEd
 import { SupplementalContentEdit } from "@/components/review/sections/editable/SupplementalContentEdit";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
 import { partnerCenterApi } from "@/services/partnerCenterApi";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -154,6 +155,7 @@ const OfferReview = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
  useEffect(() => {
@@ -328,6 +330,8 @@ const OfferReview = () => {
 
 
   const handleApproveAndPublish = async () => {
+    setIsSubmitting(true); // Start loading
+    
     try {
       //toast.success("Submitting offer to Partner Center...");
       
@@ -414,6 +418,8 @@ const OfferReview = () => {
     } catch (error) {
       console.error('Submit to Partner Center failed:', error);
       toast.error("Failed to submit offer to Partner Center");
+    } finally {
+      setIsSubmitting(false); // End loading
     }
   };
 
@@ -508,7 +514,18 @@ const OfferReview = () => {
           "$schema": "https://schema.mp.microsoft.com/schema/product/2022-03-01-preview3",
           "resourceName": "mySaaSProduct",
           "identity": {
-            "externalId": data.properties?.sku || data.offer_setup?.offerAlias || "default-sku"
+            "externalId": (() => {
+              const baseId = data.properties?.sku || data.offer_setup?.offerAlias || "default-sku";
+              // Remove all non-alphanumeric characters except hyphens, convert to lowercase, ensure it starts with letter
+              let cleanId = baseId.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
+              // Ensure it starts with a letter
+              if (!/^[a-z]/.test(cleanId)) {
+                cleanId = 'offer-' + cleanId;
+              }
+              // Ensure it's between 3-50 characters and doesn't end with hyphen
+              cleanId = cleanId.replace(/-+$/, '').substring(0, 50);
+              return cleanId.length < 3 ? 'offer-' + cleanId : cleanId;
+            })()
           },
           "type": "softwareAsAService",
           "alias": data.offer_setup?.offerAlias || "default-alias"
@@ -654,8 +671,15 @@ const OfferReview = () => {
               {offerData.offer_alias || `ID: ${offerId}`}
             </p>
           </div>
-          <Button onClick={handleApproveAndPublish} size="lg" className="bg-primary hover:bg-primary/90">
-            Submit to Partner Center
+          <Button onClick={handleApproveAndPublish} size="lg" className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              "Submit to Partner Center"
+            )}
           </Button>
         </div>
 
