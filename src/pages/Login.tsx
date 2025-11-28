@@ -184,13 +184,13 @@ const Login = () => {
           <div className="text-center text-xs text-muted-foreground">
             By signing in, you agree to our Terms of Service and Privacy Policy
           </div>
-        </Card>
-      </div>
 
-      {/* Footer Section */}
-      <div className="absolute bottom-8 flex items-center gap-6 text-4xl text-muted-foreground">
-        <span>Built by</span>
-        <img src={optimusLogo} alt="Optimus Information" className="h-18 object-contain" />
+          {/* Built by section inside card */}
+          <div className="flex items-center justify-center gap-3 text-lg text-muted-foreground pt-4 border-t">
+            <span>Built by</span>
+            <img src={optimusLogo} alt="Optimus Information" className="h-8 object-contain" />
+          </div>
+        </Card>
       </div>
     </div>;
 };
