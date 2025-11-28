@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Loader2, Check, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AISelectFieldProps {
   fieldName: string;
@@ -31,37 +31,59 @@ export const AISelectField = ({
 }: AISelectFieldProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const { msalInstance } = useAuth();
 
   const handleAnalyze = async () => {
-    if (!websiteUrl) {
-      toast.error("Website URL is required for AI analysis");
-      return;
-    }
-
     setIsAnalyzing(true);
     try {
-      const { data, error } = await supabase.functions.invoke('regenerate-field', {
-        body: {
-          offerId,
-          websiteUrl,
-          section,
-          fieldName,
-          currentValue: null,
-          userFeedback: `Analyze the website and suggest the most appropriate ${label.toLowerCase()}. Return as a comma-separated list.`,
-          existingOfferData: null
-        }
+      // Get authentication token
+      const accounts = msalInstance.getAllAccounts();
+      if (!accounts.length) {
+        toast.error("No authenticated account found");
+        return;
+      }
+
+      const tokenResponse = await msalInstance.acquireTokenSilent({
+        scopes: ["https://graph.microsoft.com/.default"],
+        account: accounts[0],
       });
 
-      if (error) throw error;
+      // Prepare the API request
+      const requestBody = {
+        current_text: `Suggest ${label.toLowerCase()}`,
+        prompt: `Analyze and suggest the most appropriate ${label.toLowerCase()}. Return as a comma-separated list.`
+      };
 
-      if (data?.generatedValue) {
-        const suggestedValues = data.generatedValue
+      const response = await fetch(
+        'https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/ai/regenerate',
+        {
+          method: 'POST',
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokenResponse.accessToken}`,
+          },
+          body: JSON.stringify(requestBody)
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('AI analysis result:', result);
+
+      if (result.success && result.regenerated_text) {
+        const suggestedValues = result.regenerated_text
           .split(',')
           .map((s: string) => s.trim())
           .filter((s: string) => s.length > 0);
         
         setSuggestions(suggestedValues);
         toast.success(`AI suggestions ready for ${label}`);
+      } else {
+        throw new Error(result.message || 'Failed to generate suggestions');
       }
     } catch (error) {
       console.error('AI analysis error:', error);
