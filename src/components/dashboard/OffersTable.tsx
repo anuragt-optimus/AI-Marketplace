@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Offer {
   id: string;
@@ -48,6 +49,9 @@ interface Offer {
   created_at: string;
   updated_at: string;
   error_message: string | null;
+  job_id?: string;
+  product_id?: string;
+  user_email?: string;
 }
 
 // Hardcoded dummy data for demonstration purposes
@@ -176,6 +180,7 @@ const DUMMY_OFFERS: Offer[] = [
 
 export const OffersTable = () => {
   const navigate = useNavigate();
+  const { msalInstance, isInitialized } = useAuth();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [filteredOffers, setFilteredOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -193,7 +198,7 @@ export const OffersTable = () => {
   useEffect(() => {
     fetchOffers();
     
-    // Subscribe to real-time updates
+    // Subscribe to real-time updates (keeping this for future use)
     const channel = supabase
       .channel("offers-changes")
       .on(
@@ -213,7 +218,7 @@ export const OffersTable = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [isInitialized]); // Add isInitialized as dependency
 
   useEffect(() => {
     applyFilters();
@@ -228,19 +233,75 @@ export const OffersTable = () => {
   }, [showDummyData, offers]);
 
   const fetchOffers = async () => {
+    // Only proceed if MSAL is initialized
+    if (!isInitialized) {
+      console.log("MSAL not initialized yet, waiting...");
+      return;
+    }
+
     try {
-      const { data, error } = await supabase
-        .from("offers")
-        .select("*")
-        .order("updated_at", { ascending: false });
+      // Get account
+      const accounts = msalInstance.getAllAccounts();
+      if (!accounts.length) {
+        console.log("No accounts found");
+        setLoading(false);
+        return;
+      }
 
-      if (error) throw error;
+      // Acquire token
+      const tokenResponse = await msalInstance.acquireTokenSilent({
+        scopes: ["https://graph.microsoft.com/.default"],
+        account: accounts[0],
+      });
 
-      setOffers(data || []);
-      calculateCounts(data || []);
+      // Fetch offers from API
+      const response = await fetch(
+        "https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/user/offers",
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${tokenResponse.accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Fetched offers data:", data);
+
+      // Transform API response to match our interface
+      const transformedOffers: Offer[] = data.offers?.map((offer: any) => {
+        // Extract listing title from resources
+        const mainListing = offer.resources?.find((r: any) => r.resourceName === "mainListing");
+        const productResource = offer.resources?.find((r: any) => r.type === "softwareAsAService");
+        
+        return {
+          id: offer.id,
+          listing_title: mainListing?.title || productResource?.alias || null,
+          status: offer.status.toLowerCase(), // Convert to lowercase to match our statuses
+          offer_type: productResource?.type === "softwareAsAService" ? "SaaS" : "Unknown",
+          partner_center_id: offer.product_id || null,
+          created_at: offer.created_at,
+          updated_at: offer.updated_at,
+          error_message: null, // API doesn't seem to provide error messages in this format
+          job_id: offer.job_id,
+          product_id: offer.product_id,
+          user_email: offer.user_email,
+        };
+      }) || [];
+
+      setOffers(transformedOffers);
+      calculateCounts(transformedOffers);
     } catch (error) {
       console.error("Error fetching offers:", error);
       toast.error("Failed to load offers");
+      // Fall back to dummy data or empty array
+      setOffers([]);
+      calculateCounts([]);
     } finally {
       setLoading(false);
     }
@@ -354,13 +415,7 @@ export const OffersTable = () => {
             onSearchChange={setSearchTerm}
             counts={counts}
           />
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Show dummy data</span>
-            <Switch
-              checked={showDummyData}
-              onCheckedChange={setShowDummyData}
-            />
-          </div>
+         
         </div>
 
         {filteredOffers.length === 0 ? (
@@ -455,15 +510,17 @@ export const OffersTable = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <span
-                          className="text-sm"
-                          title={new Date(offer.updated_at).toLocaleString()}
-                        >
-                          {formatDistanceToNow(new Date(offer.updated_at), {
-                            addSuffix: true,
-                          })}
-                        </span>
-                      </TableCell>
+  <span
+    className="text-sm"
+    title={new Date(new Date(offer.updated_at).getTime() + (5.5 * 60 * 60 * 1000)).toLocaleString()}
+  >
+    {formatDistanceToNow(
+      new Date(new Date(offer.updated_at).getTime() + (5.5 * 60 * 60 * 1000)),
+      { addSuffix: true }
+    )}
+  </span>
+</TableCell>
+
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>

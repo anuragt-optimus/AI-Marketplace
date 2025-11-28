@@ -308,24 +308,51 @@ const OfferReview = () => {
 
   const handleApproveAndPublish = async () => {
     try {
-      toast.success("Preparing to publish offer...");
+      //toast.success("Submitting offer to Partner Center...");
       
-      // Test Partner Center API connection
-      console.log('Testing Partner Center API for publishing...');
+      // Get access token for authentication
+      const accounts = msalInstance.getAllAccounts();
+      if (!accounts.length) {
+        toast.error("No authenticated account found");
+        return;
+      }
+
+      const tokenResponse = await msalInstance.acquireTokenSilent({
+        scopes: ["https://graph.microsoft.com/.default"],
+        account: accounts[0],
+      });
+
+      // Submit to Partner Center API
+      const response = await fetch(
+        `https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/submit-to-partner-portal?offer_id=${offerId}`,
+        {
+          method: 'POST',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${tokenResponse.accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: ''
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Submit to Partner Center result:', result);
       
-      try {
-        // Try to get offer status from Partner Center
-        const status = await partnerCenterApi.getOfferStatus(offerId!);
-        console.log('Partner Center offer status:', status);
-      } catch (apiError) {
-        console.log('Partner Center API test failed:', apiError);
-        // Continue with demo flow for now
+      if (result.job_status === 'running') {
+        toast(`Submitting offer to Partner Center...`);
+        navigate(`/offer/publish/${offerId}`);
+      } else {
+        toast.error(`Submission failed: ${result.message || 'Unknown error'}`);
       }
       
-      navigate(`/offer/publish/${offerId}`);
     } catch (error) {
-      console.error('Publish preparation failed:', error);
-      toast.error("Failed to prepare offer for publishing");
+      console.error('Submit to Partner Center failed:', error);
+      toast.error("Failed to submit offer to Partner Center");
     }
   };
 
