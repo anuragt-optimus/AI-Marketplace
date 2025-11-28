@@ -31,9 +31,7 @@ const OfferDraftCreated = () => {
     fetchOfferDetails();
   }, [offerId]);
 
-  const partnerCenterUrl = partnerCenterId 
-    ? `https://partner.microsoft.com/dashboard/marketplace-offers/overview/${partnerCenterId}`
-    : "https://partner.microsoft.com/dashboard/marketplace-offers/overview";
+
 
   return (
     <Layout>
@@ -63,7 +61,7 @@ const OfferDraftCreated = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg" 
-                onClick={() => window.open(partnerCenterUrl, '_blank')}
+                onClick={() => window.open(`https://partner.microsoft.com/en-us/dashboard/commercial-marketplace/offers`, '_blank')}
                 className="gap-2"
               >
                 View on Partner Center

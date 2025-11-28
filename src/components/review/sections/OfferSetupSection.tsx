@@ -26,12 +26,7 @@ export const OfferSetupSection = ({ data }: OfferSetupSectionProps) => {
           </Badge>
         </div>
         
-        <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
-          <span className="text-sm font-medium text-foreground">Test Drive</span>
-          <Badge variant={data.enableTestDrive ? "default" : "secondary"} className="text-xs">
-            {data.enableTestDrive ? "Enabled" : "Disabled"}
-          </Badge>
-        </div>
+       
       </div>
     </div>
   );

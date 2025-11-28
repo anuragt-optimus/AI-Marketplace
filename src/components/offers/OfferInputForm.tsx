@@ -6,43 +6,24 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { OfferTypeSelector } from "@/components/offers/OfferTypeSelector";
-import { AccountSelector } from "@/components/offers/AccountSelector";
-import { ProgramSelector } from "@/components/offers/ProgramSelector";
-import { MOCK_ACCOUNTS, getEnrolledPrograms, getOfferTypesByProgram } from "@/constants/mockPartnerCenterData";
 
 interface OfferInputFormProps {
   onGenerate: (url: string, offerAlias: string, offerType: string) => void;
 }
 
 export const OfferInputForm = ({ onGenerate }: OfferInputFormProps) => {
-  const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
-  const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
   const [selectedOfferType, setSelectedOfferType] = useState<string | null>(null);
   const [offerAlias, setOfferAlias] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [files, setFiles] = useState<File[]>([]);
 
-  // Get programs based on selected account
-  const availablePrograms = selectedAccount 
-    ? getEnrolledPrograms(selectedAccount) 
-    : [];
-
-  // Get offer types based on selected program
-  const availableOfferTypes = selectedProgram 
-    ? getOfferTypesByProgram(selectedProgram) 
-    : [];
-
-  // Reset logic when selections change
-  const handleAccountSelect = (accountId: string) => {
-    setSelectedAccount(accountId);
-    setSelectedProgram(null);
-    setSelectedOfferType(null);
-  };
-
-  const handleProgramSelect = (programId: string) => {
-    setSelectedProgram(programId);
-    setSelectedOfferType(null);
-  };
+  // Define available offer types directly (or import from constants)
+  const availableOfferTypes = [
+    { value: "saas", label: "SaaS", description: "Software as a Service" },
+    { value: "managed-service", label: "Managed Service", description: "Managed Application" },
+    { value: "consulting-service", label: "Consulting Service", description: "Professional Services" },
+    { value: "azure-application", label: "Azure Application", description: "Azure Application Offer" }
+  ];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -56,9 +37,9 @@ export const OfferInputForm = ({ onGenerate }: OfferInputFormProps) => {
     }
   };
 
-  // Validate alias format: 3-50 chars, lowercase, numbers, hyphens only
-  const isValidAlias = /^[a-z0-9-]{3,50}$/.test(offerAlias);
-  const canSubmit = selectedAccount && selectedProgram && selectedOfferType && offerAlias && websiteUrl && isValidAlias;
+  // Validate alias format: 3-50 chars, letters, numbers, hyphens, and spaces
+  const isValidAlias = /^[a-zA-Z0-9\s-]{3,50}$/.test(offerAlias);
+  const canSubmit = selectedOfferType && offerAlias && websiteUrl && isValidAlias;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -70,30 +51,12 @@ export const OfferInputForm = ({ onGenerate }: OfferInputFormProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Step 1: Account Selection */}
-          <AccountSelector
-            accounts={MOCK_ACCOUNTS}
-            selectedAccount={selectedAccount}
-            onSelect={handleAccountSelect}
+          {/* Offer Type Selection */}
+          <OfferTypeSelector
+            offerTypes={availableOfferTypes}
+            selectedType={selectedOfferType}
+            onSelect={setSelectedOfferType}
           />
-
-          {/* Step 2: Program Selection (only show if account selected) */}
-          {selectedAccount && (
-            <ProgramSelector
-              programs={availablePrograms}
-              selectedProgram={selectedProgram}
-              onSelect={handleProgramSelect}
-            />
-          )}
-
-          {/* Step 3: Offer Type Selection (only show if program selected) */}
-          {selectedProgram && (
-            <OfferTypeSelector
-              offerTypes={availableOfferTypes}
-              selectedType={selectedOfferType}
-              onSelect={setSelectedOfferType}
-            />
-          )}
 
           {/* Offer Alias */}
           <div className="space-y-2">
@@ -104,17 +67,17 @@ export const OfferInputForm = ({ onGenerate }: OfferInputFormProps) => {
             <Input
               id="alias"
               type="text"
-              placeholder="my-saas-product"
+              placeholder="My SaaS Product"
               value={offerAlias}
-              onChange={(e) => setOfferAlias(e.target.value.toLowerCase())}
+              onChange={(e) => setOfferAlias(e.target.value)}
               className={offerAlias && !isValidAlias ? "border-destructive" : ""}
             />
             <p className="text-xs text-muted-foreground">
-              3-50 characters, lowercase letters, numbers, and hyphens only
+              3-50 characters, letters (uppercase/lowercase), numbers, hyphens, and spaces
             </p>
             {offerAlias && !isValidAlias && (
               <p className="text-xs text-destructive">
-                Invalid format. Use only lowercase letters, numbers, and hyphens.
+                Invalid format. Use only letters, numbers, hyphens, and spaces.
               </p>
             )}
           </div>
