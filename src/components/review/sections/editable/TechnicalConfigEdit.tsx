@@ -12,9 +12,10 @@ interface TechnicalConfigEditProps {
   };
   onSave: (data: any) => void;
   onCancel: () => void;
+  isSaving?: boolean;
 }
 
-export const TechnicalConfigEdit = ({ data, onSave, onCancel }: TechnicalConfigEditProps) => {
+export const TechnicalConfigEdit = ({ data, onSave, onCancel, isSaving = false }: TechnicalConfigEditProps) => {
   const { register, handleSubmit } = useForm({
     defaultValues: {
       landingPageUrl: data?.landingPageUrl || "",
@@ -47,10 +48,10 @@ export const TechnicalConfigEdit = ({ data, onSave, onCancel }: TechnicalConfigE
       </div>
 
       <div className="flex gap-2 pt-4 border-t">
-        <Button type="submit" size="sm">
-          Save Changes
+        <Button type="submit" size="sm" disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save Changes"}
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={onCancel}>
+        <Button type="button" variant="outline" size="sm" onClick={onCancel} disabled={isSaving}>
           Cancel
         </Button>
       </div>

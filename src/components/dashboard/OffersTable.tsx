@@ -76,7 +76,7 @@ export const OffersTable = () => {
 
   useEffect(() => {
     fetchOffers();
-    
+
     // Subscribe to real-time updates (keeping this for future use)
     const channel = supabase
       .channel("offers-changes")
@@ -105,7 +105,7 @@ export const OffersTable = () => {
 
   useEffect(() => {
     if (showDummyData) {
-     
+
     } else {
       calculateCounts(offers);
     }
@@ -157,18 +157,18 @@ export const OffersTable = () => {
         // Extract listing title from resources
         const mainListing = offer.resources?.find((r: any) => r.resourceName === "mainListing");
         const productResource = offer.resources?.find((r: any) => r.type === "softwareAsAService");
-        
+
         // Log the original status for debugging
         console.log(`Offer ${offer.id} - Original status: "${offer.status}", Converted: "${offer.status.toLowerCase()}"`);
-        
+
         // Map API statuses to our expected statuses
         const mapStatus = (apiStatus: string): string => {
           const status = apiStatus.toLowerCase();
-          
+
           // Direct mappings
           const statusMappings: Record<string, string> = {
             'draft': 'draft',
-            'generating': 'generating', 
+            'generating': 'generating',
             'ready_to_review': 'ready_to_review',
             'ready_to_publish': 'ready_to_publish',
             'submitted': 'submitted',
@@ -188,16 +188,16 @@ export const OffersTable = () => {
             'validating': 'submitted',
             'approved': 'published',
           };
-          
+
           const mappedStatus = statusMappings[status];
           if (!mappedStatus) {
             console.warn(`Unknown status "${apiStatus}" for offer ${offer.id}, defaulting to draft`);
             return 'draft';
           }
-          
+
           return mappedStatus;
         };
-        
+
         return {
           id: offer.id,
           listing_title: mainListing?.title || productResource?.alias || null,
@@ -215,7 +215,7 @@ export const OffersTable = () => {
 
       setOffers(transformedOffers);
       calculateCounts(transformedOffers);
-      
+
       // Additional debug info
       console.log("Transformed offers:", transformedOffers);
       console.log("Status summary:", transformedOffers.map(offer => ({ id: offer.id, status: offer.status })));
@@ -338,7 +338,7 @@ export const OffersTable = () => {
             onSearchChange={setSearchTerm}
             counts={counts}
           />
-         
+
         </div>
 
         {filteredOffers.length === 0 ? (
@@ -433,16 +433,16 @@ export const OffersTable = () => {
                         )}
                       </TableCell>
                       <TableCell>
-  <span
-    className="text-sm"
-    title={new Date(new Date(offer.updated_at).getTime() + (5.5 * 60 * 60 * 1000)).toLocaleString()}
-  >
-    {formatDistanceToNow(
-      new Date(new Date(offer.updated_at).getTime() + (5.5 * 60 * 60 * 1000)),
-      { addSuffix: true }
-    )}
-  </span>
-</TableCell>
+                        <span
+                          className="text-sm"
+                          title={new Date(new Date(offer.updated_at).getTime() + (5.5 * 60 * 60 * 1000)).toLocaleString()}
+                        >
+                          {formatDistanceToNow(
+                            new Date(new Date(offer.updated_at).getTime() + (5.5 * 60 * 60 * 1000)),
+                            { addSuffix: true }
+                          )}
+                        </span>
+                      </TableCell>
 
                       <TableCell className="text-right">
                         <DropdownMenu>
@@ -459,11 +459,11 @@ export const OffersTable = () => {
                             {["draft", "ready_to_review", "ready_to_publish"].includes(
                               offer.status
                             ) && (
-                              <DropdownMenuItem onClick={() => navigate(`/offer/review/${offer.id}`)}>
-                                <Pencil className="h-4 w-4 mr-2" />
-                                Edit
-                              </DropdownMenuItem>
-                            )}
+                                <DropdownMenuItem onClick={() => navigate(`/offer/review/${offer.id}`)}>
+                                  <Pencil className="h-4 w-4 mr-2" />
+                                  Edit
+                                </DropdownMenuItem>
+                              )}
                             {offer.status === "failed" && (
                               <DropdownMenuItem>
                                 <RefreshCw className="h-4 w-4 mr-2" />

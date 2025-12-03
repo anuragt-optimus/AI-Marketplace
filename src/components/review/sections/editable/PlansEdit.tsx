@@ -23,9 +23,10 @@ interface PlansEditProps {
   existingOfferData?: any;
   onSave: (data: any) => void;
   onCancel: () => void;
+  isSaving?: boolean;
 }
 
-export const PlansEdit = ({ data, websiteUrl, offerId, existingOfferData, onSave, onCancel }: PlansEditProps) => {
+export const PlansEdit = ({ data, websiteUrl, offerId, existingOfferData, onSave, onCancel, isSaving = false }: PlansEditProps) => {
   const [plans, setPlans] = useState<Plan[]>(data || []);
 
   const addPlan = () => {
@@ -150,10 +151,10 @@ export const PlansEdit = ({ data, websiteUrl, offerId, existingOfferData, onSave
       </Button>
 
       <div className="flex gap-2 pt-4 border-t">
-        <Button type="button" size="sm" onClick={handleSave}>
-          Save Changes
+        <Button type="button" size="sm" onClick={handleSave} disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save Changes"}
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={onCancel}>
+        <Button type="button" variant="outline" size="sm" onClick={onCancel} disabled={isSaving}>
           Cancel
         </Button>
       </div>

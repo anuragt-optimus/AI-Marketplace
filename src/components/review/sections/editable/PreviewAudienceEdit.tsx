@@ -12,9 +12,10 @@ interface PreviewAudienceEditProps {
   };
   onSave: (data: any) => void;
   onCancel: () => void;
+  isSaving?: boolean;
 }
 
-export const PreviewAudienceEdit = ({ data, onSave, onCancel }: PreviewAudienceEditProps) => {
+export const PreviewAudienceEdit = ({ data, onSave, onCancel, isSaving = false }: PreviewAudienceEditProps) => {
   const [emails, setEmails] = useState<string[]>(data?.previewAudience || []);
   const [newEmail, setNewEmail] = useState("");
 
@@ -94,10 +95,10 @@ export const PreviewAudienceEdit = ({ data, onSave, onCancel }: PreviewAudienceE
       )}
 
       <div className="flex gap-2 pt-4 border-t">
-        <Button type="button" size="sm" onClick={handleSave}>
-          Save Changes
+        <Button type="button" size="sm" onClick={handleSave} disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save Changes"}
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={onCancel}>
+        <Button type="button" variant="outline" size="sm" onClick={onCancel} disabled={isSaving}>
           Cancel
         </Button>
       </div>

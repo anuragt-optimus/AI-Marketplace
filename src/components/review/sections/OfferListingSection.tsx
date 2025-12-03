@@ -5,7 +5,6 @@ interface OfferListingSectionProps {
   data: {
     name?: string;
     searchSummary?: string;
-    shortDescription?: string;
     description?: string;
     gettingStartedInstructions?: string;
     contacts?: {
@@ -58,21 +57,6 @@ export const OfferListingSection = ({ data }: OfferListingSectionProps) => {
             <p className="text-xs text-muted-foreground mt-1">
               {data.searchSummary.length} / 100 characters
             </p>
-          </div>
-        )}
-
-        {data.shortDescription && (
-          <div>
-            <h4 className="text-sm font-semibold text-foreground mb-2">Short Description</h4>
-            <p className="text-sm text-muted-foreground">{data.shortDescription}</p>
-            <div className="flex items-center justify-between mt-1">
-              <p className="text-xs text-muted-foreground">
-                {data.shortDescription.length} / 200 characters
-              </p>
-               <Badge variant={data.shortDescription.length <= 200 ? "default" : "destructive"}>
-                {data.shortDescription.length <= 200 ? "✓ Valid" : "⚠️ Too long"}
-              </Badge> 
-            </div>
           </div>
         )}
 

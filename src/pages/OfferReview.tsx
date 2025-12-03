@@ -8,19 +8,17 @@ import { PropertiesSection } from "@/components/review/sections/PropertiesSectio
 import { TechnicalConfigSection } from "@/components/review/sections/TechnicalConfigSection";
 import { PreviewAudienceSection } from "@/components/review/sections/PreviewAudienceSection";
 import { ResellCSPSection } from "@/components/review/sections/ResellCSPSection";
-import { SupplementalContentSection } from "@/components/review/sections/SupplementalContentSection";
-import { OfferSetupEdit } from "@/components/review/sections/editable/OfferSetupEdit";
+import { MediaSection } from "@/components/review/sections/MediaSection";
 import { PropertiesEdit } from "@/components/review/sections/editable/PropertiesEdit";
 import { OfferListingEdit } from "@/components/review/sections/editable/OfferListingEdit";
 import { PlansEdit } from "@/components/review/sections/editable/PlansEdit";
 import { TechnicalConfigEdit } from "@/components/review/sections/editable/TechnicalConfigEdit";
 import { PreviewAudienceEdit } from "@/components/review/sections/editable/PreviewAudienceEdit";
 import { ResellCSPEdit } from "@/components/review/sections/editable/ResellCSPEdit";
-import { SupplementalContentEdit } from "@/components/review/sections/editable/SupplementalContentEdit";
+import { MediaEdit } from "@/components/review/sections/editable/MediaEdit";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2 } from "lucide-react";
-import { partnerCenterApi } from "@/services/partnerCenterApi";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -53,9 +51,12 @@ const OfferReview = () => {
     legalInfo: {
       useStandardContract: true,
       privacyPolicyUrl: "https://example.com/privacy",
-      termsOfUseUrl: "https://example.com/terms"
+      termsOfUseType: "url" as const,
+      termsOfUseUrl: "https://example.com/terms",
+      termsOfUseText: ""
     },
     standardContractAmendment: "This is a sample standard contract amendment text.",
+    useMicrosoftLicenseManagement: false,
     sku: "AI-VIDEO-SUITE-001",
     publisherId: "PUB-123456",
     version: "v1.0",
@@ -151,6 +152,17 @@ const OfferReview = () => {
       { name: "Product Walkthrough", url: "https://youtube.com/demo" },
     ],
   },
+
+  media: {
+    logos: {
+      small: "",
+      medium: "",
+      large: "",
+      wide: "",
+      hero: "",
+    },
+    screenshots: [],
+  },
 });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -233,6 +245,9 @@ const OfferReview = () => {
         offer_setup: {
           offerAlias: productResource?.alias,
           sellThroughMicrosoft: marketplaceSetup?.sellThroughMicrosoft || false,
+          // useMicrosoftLicenseManagement: properties?.useMicrosoftLicenseManagement || false,
+          useMicrosoftLicenseManagementService: properties?.useMicrosoftLicenseManagementService,
+          requireLicenseForInstall: properties?.requireLicenseForInstall,
           enableTestDrive: false, // This field doesn't seem to be in the API
           category: properties?.categories?.web?.[0] || "Web",
           publisherName: listing?.supportContact?.name || "Publisher",
@@ -249,10 +264,12 @@ const OfferReview = () => {
           legalInfo: {
             useStandardContract: properties?.termsConditions === "standardMicrosoft" || properties?.termsConditions === "standard",
             privacyPolicyUrl: listing?.privacyPolicyLink,
-            termsOfUseUrl: properties?.termsOfUseUrl
+            termsOfUseUrl: properties?.termsOfUseUrl || "",
+            termsOfUseText: properties?.termsOfUse || "",
+            termsOfUseType: properties?.termsOfUseUrl ? "url" as const : "text" as const
           },
           standardContractAmendment: properties?.standardContractAmendment || "",
-          sku: productResource?.identity?.externalId,
+            sku: productResource?.identity?.externalId,
           publisherId: raw.product_id,
           version: properties?.appVersion,
           keywords: listing?.searchKeywords || [],
@@ -437,7 +454,8 @@ const OfferReview = () => {
       'technicalConfig': 'technical_config',
       'previewAudience': 'preview_audience',
       'resellCSP': 'resell_csp',
-      'supplementalContent': 'supplemental_content'
+      'supplementalContent': 'supplemental_content',
+      'media': 'media'
     };
 
     setIsSaving(true); // Start loading
@@ -453,9 +471,6 @@ const OfferReview = () => {
       
       setOfferData(updatedOfferData);
 
-      // Convert updated offer data to API format
-      const apiPayload = await convertToApiFormat(updatedOfferData);
-      
       // Get authentication token
       const accounts = msalInstance.getAllAccounts();
       if (!accounts.length) {
@@ -467,6 +482,15 @@ const OfferReview = () => {
         scopes: ["https://graph.microsoft.com/.default"],
         account: accounts[0],
       });
+
+      // Handle media uploads first if this is a media section save
+      if (sectionId === 'media' && updatedData.files) {
+        console.log('Media section detected, uploading files:', updatedData.files);
+        await uploadMediaAssets(tokenResponse.accessToken, updatedData.files);
+      }
+
+      // Convert updated offer data to API format
+      const apiPayload = await convertToApiFormat(updatedOfferData);
 
       // Send PUT request to update the offer
       const response = await fetch(
@@ -499,10 +523,98 @@ const OfferReview = () => {
     }
   };
 
+  // Helper function to upload media assets
+  const uploadMediaAssets = async (accessToken: string, files: any) => {
+    try {
+      const formData = new FormData();
+      
+      // Add logo files - match the curl command format
+      if (files.logoSmall) {
+        formData.append('logo_small', files.logoSmall);
+      }
+      if (files.logoMedium) {
+        formData.append('logo_medium', files.logoMedium);
+      }
+      if (files.logoLarge) {
+        formData.append('logo_large', files.logoLarge);
+      }
+      if (files.logoWide) {
+        formData.append('logo_wide', files.logoWide);
+      }
+      
+      // Add screenshot files
+      if (files.screenshots) {
+        files.screenshots.forEach((screenshot: File, index: number) => {
+          formData.append(`screenshot_${index + 1}`, screenshot);
+        });
+      }
+
+      console.log('Uploading media assets with formData:', {
+        logoSmall: !!files.logoSmall,
+        logoMedium: !!files.logoMedium,
+        logoLarge: !!files.logoLarge,
+        logoWide: !!files.logoWide,
+        screenshots: files.screenshots?.length || 0
+      });
+
+      const response = await fetch(
+        `https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/offers/${offerId}/upload-assets`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          body: formData
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Asset upload failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorBody: errorText
+        });
+        throw new Error(`Asset upload failed with status: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('------Asset upload result:', result);
+      toast.success("Media assets uploaded successfully");
+      
+    } catch (error) {
+      console.error('Error uploading assets:', error);
+      toast.error(`Failed to upload media assets: ${error.message}`);
+      throw error;
+    }
+  };
+
+  // Helper function to determine the correct API kind based on offer type
+  const getOfferKind = (offerData: any) => {
+    const offerType = offerData.offer_setup?.type;
+    console.log('Detected offer type:', offerType, 'Full offer_setup:', offerData.offer_setup);
+   
+    switch (offerType) {
+      case 'SaaS':
+        return 'azureSaaS';
+      case 'VM':
+      case 'Virtual Machine':
+        return 'azureVM';
+      case 'Container':
+        return 'azureContainer';
+      case 'Managed Application':
+        return 'azureManagedApplication';
+      default:
+        return 'azureVM';
+    }
+    
+  };
+
   // Helper function to convert internal offer data to API format
   const convertToApiFormat = async (data: any) => {
     // Get the original offer data to preserve structure and IDs
     const originalData = offerData;
+   const offerKind = getOfferKind(data);
     console.log('-------------Converting to API format. Original data:', originalData.product_id);
     
     return {
@@ -534,17 +646,28 @@ const OfferReview = () => {
           "$schema": "https://schema.mp.microsoft.com/schema/commercial-marketplace-setup/2022-03-01-preview2",
           "resourceName": "marketplaceSetup",
           "product": data.product_id || "product/default",
-          "sellThroughMicrosoft": data.offer_setup?.sellThroughMicrosoft || true
+          "sellThroughMicrosoft": data.offer_setup?.sellThroughMicrosoft || true,
+          "useMicrosoftLicenseManagement": data.properties?.useMicrosoftLicenseManagement || false,
+          ...(data.properties?.useMicrosoftLicenseManagementService !== undefined && {
+            "useMicrosoftLicenseManagementService": data.properties.useMicrosoftLicenseManagementService
+          }),
+          ...(data.properties?.requireLicenseForInstall !== undefined && {
+            "requireLicenseForInstall": data.properties.requireLicenseForInstall
+          })
         },
         {
           "$schema": "https://schema.mp.microsoft.com/schema/property/2022-03-01-preview5",
           "resourceName": "productProperties",
           "product": data.product_id || "product/default",
-          "kind": "azureSaaS",
+          "kind": offerKind,
           "termsConditions": data.properties?.legalInfo?.useStandardContract ? "standardMicrosoft" : "custom",
           "standardContractAmendment": data.properties?.legalInfo?.useStandardContract ? (data.properties?.standardContractAmendment || "") : undefined,
-          "termsOfUseUrl": data.properties?.legalInfo?.termsOfUseUrl || "https://www.yourcompany.com/legal/terms-of-use",
-          "termsOfUse": data.properties?.legalTerms || "Your custom terms and conditions text goes here.",
+          "termsOfUseUrl": data.properties?.legalInfo?.termsOfUseType === "url" ? 
+            (data.properties?.legalInfo?.termsOfUseUrl || "https://www.yourcompany.com/legal/terms-of-use") : 
+            undefined,
+          "termsOfUse": data.properties?.legalInfo?.termsOfUseType === "text" ? 
+            (data.properties?.legalInfo?.termsOfUseText || data.properties?.legalTerms || "Your custom terms and conditions text goes here.") : 
+            (data.properties?.legalTerms || "Your custom terms and conditions text goes here."),
           "categories": {
             "web": [data.properties?.categories?.primary || "web"]
           },
@@ -553,7 +676,7 @@ const OfferReview = () => {
         {
           "$schema": "https://schema.mp.microsoft.com/schema/listing/2022-03-01-preview5",
           "resourceName": "mainListing",
-          "kind": "azureSaaS",
+          "kind": offerKind,
           "product": data.product_id || "product/default",
           "languageId": data.offer_listing?.language?.replace("_", "-") || "en-us",
           "title": data.offer_listing?.name || "Untitled Offer",
@@ -731,6 +854,7 @@ const OfferReview = () => {
                   existingOfferData={offerData}
                   onSave={(data) => handleSaveSection('offerListing', data)}
                   onCancel={handleCancelEdit}
+                  isSaving={isSaving}
                 />
               }
             >
@@ -753,6 +877,7 @@ const OfferReview = () => {
                     existingOfferData={offerData}
                     onSave={(data) => handleSaveSection('plans', data)}
                     onCancel={handleCancelEdit}
+                    isSaving={isSaving}
                   />
                 }
               >
@@ -810,6 +935,7 @@ const OfferReview = () => {
                   data={offerData.technical_config || {}}
                   onSave={(data) => handleSaveSection('technicalConfig', data)}
                   onCancel={handleCancelEdit}
+                  isSaving={isSaving}
                 />
               }
             >
@@ -828,6 +954,7 @@ const OfferReview = () => {
                   data={offerData.preview_audience || {}}
                   onSave={(data) => handleSaveSection('previewAudience', data)}
                   onCancel={handleCancelEdit}
+                  isSaving={isSaving}
                 />
               }
             >
@@ -846,10 +973,30 @@ const OfferReview = () => {
                   data={offerData.resell_csp || {}}
                   onSave={(data) => handleSaveSection('resellCSP', data)}
                   onCancel={handleCancelEdit}
+                  isSaving={isSaving}
                 />
               }
             >
               <ResellCSPSection data={offerData.resell_csp || {}} />
+            </OfferSectionCard>
+
+            {/* Media */}
+            <OfferSectionCard
+              sectionId="media"
+              title="Media"
+              isActive={activeSection === "media"}
+              isEditing={editingSection === "media"}
+              onEdit={handleEditSection}
+              editComponent={
+                <MediaEdit
+                  data={offerData.media || {}}
+                  onSave={(data) => handleSaveSection('media', data)}
+                  onCancel={handleCancelEdit}
+                  isSaving={isSaving}
+                />
+              }
+            >
+              <MediaSection data={offerData.media || {}} />
             </OfferSectionCard>
 
             {/* Supplemental Content */}

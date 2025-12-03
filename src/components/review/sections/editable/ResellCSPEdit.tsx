@@ -13,9 +13,10 @@ interface ResellCSPEditProps {
   };
   onSave: (data: any) => void;
   onCancel: () => void;
+  isSaving?: boolean;
 }
 
-export const ResellCSPEdit = ({ data, onSave, onCancel }: ResellCSPEditProps) => {
+export const ResellCSPEdit = ({ data, onSave, onCancel, isSaving = false }: ResellCSPEditProps) => {
   const { watch, setValue, handleSubmit } = useForm({
     defaultValues: {
       resellThroughCSP: data?.resellThroughCSP || "none",
@@ -109,10 +110,10 @@ export const ResellCSPEdit = ({ data, onSave, onCancel }: ResellCSPEditProps) =>
       )}
 
       <div className="flex gap-2 pt-4 border-t">
-        <Button type="submit" size="sm">
-          Save Changes
+        <Button type="submit" size="sm" disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save Changes"}
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={onCancel}>
+        <Button type="button" variant="outline" size="sm" onClick={onCancel} disabled={isSaving}>
           Cancel
         </Button>
       </div>

@@ -73,12 +73,17 @@ const CreateOffer = () => {
     
     console.log("🚀 Calling API to generate SaaS offer...");
 
+
+    console.log("-----OFFER_ALIAS", offerAlias); // Debug log
+    console.log("-----OFFER_TYPE", offerType); // Debug log
+
     const form = new FormData();
     form.append("partner_center_account", "string");   // change later if dynamic
     form.append("program", "string");                  // change later if dynamic
     form.append("offer_type", offerType);
     form.append("offer_alias", offerAlias);
     form.append("product_website_url", websiteUrl);
+   form.append("use_microsoft_license_management", "false");
 
     const res = await fetch(
       "https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/generate-saas-offer",
