@@ -21,7 +21,6 @@ export const msalConfig = {
   },
 };
 
-
 export const loginRequest = {
   scopes: ["https://graph.microsoft.com/.default"],
 };

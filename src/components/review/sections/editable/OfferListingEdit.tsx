@@ -9,7 +9,6 @@ interface OfferListingEditProps {
   data: {
     name?: string;
     searchSummary?: string;
-    shortDescription?: string;
     description?: string;
     gettingStartedInstructions?: string;
     contacts?: {
@@ -28,14 +27,14 @@ interface OfferListingEditProps {
   existingOfferData?: any;
   onSave: (data: any) => void;
   onCancel: () => void;
+  isSaving?: boolean;
 }
 
-export const OfferListingEdit = ({ data, websiteUrl, offerId, existingOfferData, onSave, onCancel }: OfferListingEditProps) => {
+export const OfferListingEdit = ({ data, websiteUrl, offerId, existingOfferData, onSave, onCancel, isSaving = false }: OfferListingEditProps) => {
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
       name: data?.name || "",
       searchSummary: data?.searchSummary || "",
-      shortDescription: data?.shortDescription || "",
       description: data?.description || "",
       gettingStartedInstructions: data?.gettingStartedInstructions || "",
       contacts: {
@@ -60,7 +59,6 @@ export const OfferListingEdit = ({ data, websiteUrl, offerId, existingOfferData,
     }
   });
 
-  const shortDescription = watch("shortDescription");
   const searchSummary = watch("searchSummary");
 
   return (
@@ -86,22 +84,6 @@ export const OfferListingEdit = ({ data, websiteUrl, offerId, existingOfferData,
         label="Search Summary"
         placeholder="Brief summary for search results"
         maxLength={100}
-        websiteUrl={websiteUrl}
-        offerId={offerId}
-        existingOfferData={existingOfferData}
-        showCharCount
-      />
-
-      <AITextField
-        fieldName="shortDescription"
-        section="offer_listing"
-        value={watch("shortDescription")}
-        onChange={(val) => setValue("shortDescription", val)}
-        label="Short Description"
-        placeholder="Brief description"
-        maxLength={200}
-        multiline
-        rows={3}
         websiteUrl={websiteUrl}
         offerId={offerId}
         existingOfferData={existingOfferData}
@@ -164,10 +146,10 @@ export const OfferListingEdit = ({ data, websiteUrl, offerId, existingOfferData,
       </div>
 
       <div className="flex gap-2 pt-4 border-t">
-        <Button type="submit" size="sm">
-          Save Changes
+        <Button type="submit" size="sm" disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save Changes"}
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={onCancel}>
+        <Button type="button" variant="outline" size="sm" onClick={onCancel} disabled={isSaving}>
           Cancel
         </Button>
       </div>

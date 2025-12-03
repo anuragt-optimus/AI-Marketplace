@@ -43,7 +43,7 @@ export const OfferTypeSelector = ({
     <SelectItem
       key={type.value}
       value={type.value}
-      disabled={type.value !== "saas"} // disable all except SaaS
+      disabled={type.value !== "SaaS"} // disable all except SaaS
     >
       <div className="flex items-center gap-2">
         <span>{type.label}</span>
