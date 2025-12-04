@@ -14,7 +14,9 @@ interface OfferListingEditProps {
     contacts?: {
       support?: { name?: string; email?: string; phone?: string; url?: string };
       engineering?: { name?: string; email?: string; phone?: string };
+      csp?: { name?: string; email?: string; phone?: string };
     };
+    cloudSolutionProviderMarketingMaterials?: string;
     marketingUrls?: {
       website?: string;
       privacyPolicy?: string;
@@ -49,7 +51,13 @@ export const OfferListingEdit = ({ data, websiteUrl, offerId, existingOfferData,
           email: data?.contacts?.engineering?.email || "",
           phone: data?.contacts?.engineering?.phone || "",
         },
+        csp: {
+          name: data?.contacts?.csp?.name || "",
+          email: data?.contacts?.csp?.email || "",
+          phone: data?.contacts?.csp?.phone || "",
+        },
       },
+      cloudSolutionProviderMarketingMaterials: data?.cloudSolutionProviderMarketingMaterials || "",
       marketingUrls: {
         website: data?.marketingUrls?.website || "",
         privacyPolicy: data?.marketingUrls?.privacyPolicy || "",
@@ -135,6 +143,20 @@ export const OfferListingEdit = ({ data, websiteUrl, offerId, existingOfferData,
           <Input {...register("contacts.engineering.email")} placeholder="Email" type="email" />
           <Input {...register("contacts.engineering.phone")} placeholder="Phone" className="col-span-2" />
         </div>
+      </div>
+
+      <div className="space-y-3">
+        <Label>CSP Contact</Label>
+        <div className="grid grid-cols-2 gap-3">
+          <Input {...register("contacts.csp.name")} placeholder="CSP contact name" />
+          <Input {...register("contacts.csp.email")} placeholder="CSP contact email" type="email" />
+          <Input {...register("contacts.csp.phone")} placeholder="CSP contact phone" className="col-span-2" />
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <Label>CSP Marketing Materials URL</Label>
+        <Input {...register("cloudSolutionProviderMarketingMaterials")} placeholder="https://cspmarketingmaterials.com" />
       </div>
 
       <div className="space-y-3">
