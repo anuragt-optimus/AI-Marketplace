@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Trash2, Plus } from "lucide-react";
 import { AITextField } from "@/components/review/AITextField";
 
@@ -14,6 +15,11 @@ interface Plan {
   billingPeriod: string;
   features?: string[];
   markets?: string[];
+  pricingModel?: "flatRate" | "perUser";
+  userLimits?: {
+    min: number;
+    max: number;
+  };
 }
 
 interface PlansEditProps {
@@ -27,7 +33,11 @@ interface PlansEditProps {
 }
 
 export const PlansEdit = ({ data, websiteUrl, offerId, existingOfferData, onSave, onCancel, isSaving = false }: PlansEditProps) => {
-  const [plans, setPlans] = useState<Plan[]>(data || []);
+  const [plans, setPlans] = useState<Plan[]>(data?.map(plan => ({
+    ...plan,
+    pricingModel: plan.pricingModel || "flatRate",
+    userLimits: plan.userLimits || { min: 1, max: 10000 }
+  })) || []);
 
   const addPlan = () => {
     setPlans([...plans, {
@@ -37,6 +47,11 @@ export const PlansEdit = ({ data, websiteUrl, offerId, existingOfferData, onSave
       billingPeriod: "month",
       features: [],
       markets: [],
+      pricingModel: "flatRate",
+      userLimits: {
+        min: 1,
+        max: 10000
+      }
     }]);
   };
 
@@ -106,7 +121,58 @@ export const PlansEdit = ({ data, websiteUrl, offerId, existingOfferData, onSave
           </div>
 
           <div>
-            <Label>Price (USD)</Label>
+            <Label>Pricing Model</Label>
+            <RadioGroup
+              value={plan.pricingModel || "flatRate"}
+              onValueChange={(val) => updatePlan(idx, 'pricingModel', val as "flatRate" | "perUser")}
+              className="flex gap-6 mt-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="flatRate" id={`flatRate-${idx}`} />
+                <Label htmlFor={`flatRate-${idx}`}>Flat Rate</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="perUser" id={`perUser-${idx}`} />
+                <Label htmlFor={`perUser-${idx}`}>Per User</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {(plan.pricingModel === "perUser") && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Minimum Users</Label>
+                <Input
+                  type="number"
+                  value={plan.userLimits?.min || 1}
+                  onChange={(e) => updatePlan(idx, 'userLimits', {
+                    ...plan.userLimits,
+                    min: parseInt(e.target.value) || 1
+                  })}
+                  placeholder="1"
+                  min="1"
+                />
+              </div>
+              <div>
+                <Label>Maximum Users</Label>
+                <Input
+                  type="number"
+                  value={plan.userLimits?.max || 10000}
+                  onChange={(e) => updatePlan(idx, 'userLimits', {
+                    ...plan.userLimits,
+                    max: parseInt(e.target.value) || 10000
+                  })}
+                  placeholder="10000"
+                  min="1"
+                />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <Label>
+              Price (USD) {plan.pricingModel === "perUser" ? "per user" : ""}
+            </Label>
             <Input
               type="number"
               value={plan.price}

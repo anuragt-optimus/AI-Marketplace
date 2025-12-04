@@ -19,7 +19,13 @@ interface OfferListingSectionProps {
         email?: string;
         phone?: string;
       };
+      csp?: {
+        name?: string;
+        email?: string;
+        phone?: string;
+      };
     };
+    cloudSolutionProviderMarketingMaterials?: string;
     marketingUrls?: {
       website?: string;
       privacyPolicy?: string;
@@ -118,6 +124,21 @@ export const OfferListingSection = ({ data }: OfferListingSectionProps) => {
                 )}
               </div>
             )}
+
+            {data.contacts.csp && (
+              <div className="p-3 bg-muted rounded-lg space-y-1">
+                <p className="text-xs font-medium text-foreground">CSP Contact</p>
+                {data.contacts.csp.name && (
+                  <p className="text-sm text-foreground">{data.contacts.csp.name}</p>
+                )}
+                {data.contacts.csp.email && (
+                  <p className="text-sm text-primary">{data.contacts.csp.email}</p>
+                )}
+                {data.contacts.csp.phone && (
+                  <p className="text-sm text-muted-foreground">{data.contacts.csp.phone}</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -159,6 +180,19 @@ export const OfferListingSection = ({ data }: OfferListingSectionProps) => {
                 </a>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* CSP Marketing Materials */}
+      {data.cloudSolutionProviderMarketingMaterials && (
+        <div>
+          <h4 className="text-sm font-semibold text-foreground mb-3">CSP Marketing Materials</h4>
+          <div className="flex items-center justify-between p-2 bg-muted rounded">
+            <span className="text-sm text-foreground">CSP Marketing Materials URL</span>
+            <a href={data.cloudSolutionProviderMarketingMaterials} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1">
+              View <ExternalLink className="w-3 h-3" />
+            </a>
           </div>
         </div>
       )}

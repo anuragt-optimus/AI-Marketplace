@@ -29,329 +29,337 @@ const OfferReview = () => {
   const [activeSection, setActiveSection] = useState<string>("");
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [offerData, setOfferData] = useState<any>({
-  offer_alias: "AI Video Suite",
-  website_url: "https://example.com",
+    offer_alias: "AI Video Suite",
+    website_url: "https://example.com",
 
-  offer_setup: {
-    offerAlias: "AI Video Suite",
-    sellThroughMicrosoft: true,
-    enableTestDrive: false,
-    category: "Productivity",
-    publisherName: "TechLabs Inc.",
-    type: "SaaS Subscription",
-    visibility: "Public",
-  },
+    offer_setup: {
+      offerAlias: "AI Video Suite",
+      sellThroughMicrosoft: true,
+      enableTestDrive: false,
+      category: "Productivity",
+      publisherName: "TechLabs Inc.",
+      type: "SaaS Subscription",
+      visibility: "Public",
+    },
 
-  properties: {
-    categories: {
-      primary: "Productivity",
-      secondary: ["AI", "Video", "Content Creation"]
+    properties: {
+      categories: {
+        primary: "Productivity",
+        secondary: ["AI", "Video", "Content Creation"]
+      },
+      appVersion: "v1.0",
+      legalInfo: {
+        useStandardContract: true,
+        privacyPolicyUrl: "https://example.com/privacy",
+        termsOfUseType: "url" as const,
+        termsOfUseUrl: "https://example.com/terms",
+        termsOfUseText: ""
+      },
+      standardContractAmendment: "This is a sample standard contract amendment text.",
+      useMicrosoftLicenseManagement: false,
+      sku: "AI-VIDEO-SUITE-001",
+      publisherId: "PUB-123456",
+      version: "v1.0",
+      keywords: ["AI", "video", "generator", "content"],
+      supportContact: "support@example.com",
+      legalTerms: "Standard SaaS subscription applies.",
     },
-    appVersion: "v1.0",
-    legalInfo: {
-      useStandardContract: true,
-      privacyPolicyUrl: "https://example.com/privacy",
-      termsOfUseType: "url" as const,
-      termsOfUseUrl: "https://example.com/terms",
-      termsOfUseText: ""
-    },
-    standardContractAmendment: "This is a sample standard contract amendment text.",
-    useMicrosoftLicenseManagement: false,
-    sku: "AI-VIDEO-SUITE-001",
-    publisherId: "PUB-123456",
-    version: "v1.0",
-    keywords: ["AI", "video", "generator", "content"],
-    supportContact: "support@example.com",
-    legalTerms: "Standard SaaS subscription applies.",
-  },
 
-  offer_listing: {
-    name: "AI Video Generator",
-    summary: "Turn any text into a realistic video with avatars.",
-    searchSummary: "Turn any text into a realistic video with avatars.",
-    language: "English",
-    description: "AI Video Generator allows users to create professional talking videos using realistic AI avatars and voices. Ideal for education, marketing, and enterprise training.",
-    longDescription: "AI Video Generator allows users to create professional talking videos using realistic AI avatars and voices. Ideal for education, marketing, and enterprise training.",
-    gettingStartedInstructions: "",
-    images: [
-      { type: "logo", url: "https://via.placeholder.com/200" },
-      { type: "banner", url: "https://via.placeholder.com/600x200" },
-    ],
-    searchKeywords: [],
-    contacts: {
-      support: {},
-      engineering: {},
-    },
-    marketingUrls: {
-      website: "",
-      privacyPolicy: "",
-      supportUrl: "",
-    },
-    generalLinks: [],
-  },
-
-  plans: [
-    {
-      name: "Starter Plan",
-      description: "Ideal for individuals and small teams",
-      price: 19,
-      billingPeriod: "month",
-      features: ["10 videos/month", "Standard voice library", "Email support"],
-      markets: ["US", "IN", "UK"],
-    },
-    {
-      name: "Enterprise Plan",
-      description: "Best for companies and agencies",
-      price: 99,
-      billingPeriod: "month",
-      features: [
-        "Unlimited videos",
-        "Premium avatars",
-        "Multilingual support",
-        "Priority support",
+    offer_listing: {
+      name: "AI Video Generator",
+      summary: "Turn any text into a realistic video with avatars.",
+      searchSummary: "Turn any text into a realistic video with avatars.",
+      language: "English",
+      description: "AI Video Generator allows users to create professional talking videos using realistic AI avatars and voices. Ideal for education, marketing, and enterprise training.",
+      longDescription: "AI Video Generator allows users to create professional talking videos using realistic AI avatars and voices. Ideal for education, marketing, and enterprise training.",
+      gettingStartedInstructions: "",
+      images: [
+        { type: "logo", url: "https://via.placeholder.com/200" },
+        { type: "banner", url: "https://via.placeholder.com/600x200" },
       ],
-      markets: ["Global"],
+      searchKeywords: [],
+      contacts: {
+        support: {},
+        engineering: {},
+      },
+      marketingUrls: {
+        website: "",
+        privacyPolicy: "",
+        supportUrl: "",
+      },
+      generalLinks: [],
     },
-  ],
 
-  technical_config: {
-    landingPageUrl: "https://example.com/landing",
-    connectionWebhook: "https://example.com/webhook",
-    entraAppId: "12345678-1234-1234-1234-123456789012",
-    entraTenantId: "87654321-4321-4321-4321-210987654321",
-    integrationType: "OAuth2",
-    loginUrl: "https://example.com/login",
-    webhookEnabled: true,
-    apiDocs: "https://docs.example.com",
-  },
-
-  preview_audience: {
-    previewAudience: ["preview.user@example.com", "qa@example.com"],
-    testerEmails: ["preview.user@example.com", "qa@example.com"],
-    allowSandboxTesting: true,
-  },
-
-  resell_csp: {
-    resellThroughCSP: "all",
-    specificCSPs: [],
-    availableForResellers: true,
-    partnerMargin: "15%",
-    contractRequired: false,
-  },
-
-  supplemental_content: {
-    supplementalContent: {
-      saasScenario: "fullyHosted",
-      subscriptionIds: ["12345678-1234-1234-1234-123456789012"]
-    },
-    documents: [
-      { name: "User Guide", url: "https://via.placeholder.com/pdf" },
-      { name: "Marketing Kit", url: "https://via.placeholder.com/pdf" },
+    plans: [
+      {
+        name: "Starter Plan",
+        description: "Ideal for individuals and small teams",
+        price: 19,
+        billingPeriod: "month",
+        features: ["10 videos/month", "Standard voice library", "Email support"],
+        markets: ["US", "IN", "UK"],
+        pricingModel: "flatRate",
+        userLimits: { min: 1, max: 10000 }
+      },
+      {
+        name: "Enterprise Plan",
+        description: "Best for companies and agencies",
+        price: 99,
+        billingPeriod: "month",
+        features: [
+          "Unlimited videos",
+          "Premium avatars",
+          "Multilingual support",
+          "Priority support",
+        ],
+        markets: ["Global"],
+        pricingModel: "perUser",
+        userLimits: { min: 1, max: 10000 }
+      },
     ],
-    videos: [
-      { name: "Product Walkthrough", url: "https://youtube.com/demo" },
-    ],
-  },
 
-  media: {
-    logos: {
-      small: "",
-      medium: "",
-      large: "",
-      wide: "",
-      hero: "",
+    technical_config: {
+      landingPageUrl: "https://example.com/landing",
+      connectionWebhook: "https://example.com/webhook",
+      entraAppId: "12345678-1234-1234-1234-123456789012",
+      entraTenantId: "87654321-4321-4321-4321-210987654321",
+      integrationType: "OAuth2",
+      loginUrl: "https://example.com/login",
+      webhookEnabled: true,
+      apiDocs: "https://docs.example.com",
     },
-    screenshots: [],
-  },
-});
+
+    preview_audience: {
+      previewAudience: ["preview.user@example.com", "qa@example.com"],
+      testerEmails: ["preview.user@example.com", "qa@example.com"],
+      allowSandboxTesting: true,
+    },
+
+    resell_csp: {
+      resellThroughCSP: "all",
+      specificCSPs: [],
+      availableForResellers: true,
+      partnerMargin: "15%",
+      contractRequired: false,
+    },
+
+    supplemental_content: {
+      supplementalContent: {
+        saasScenario: "fullyHosted",
+        subscriptionIds: ["12345678-1234-1234-1234-123456789012"]
+      },
+      documents: [
+        { name: "User Guide", url: "https://via.placeholder.com/pdf" },
+        { name: "Marketing Kit", url: "https://via.placeholder.com/pdf" },
+      ],
+      videos: [
+        { name: "Product Walkthrough", url: "https://youtube.com/demo" },
+      ],
+    },
+
+    media: {
+      logos: {
+        small: "",
+        medium: "",
+        large: "",
+        wide: "",
+        hero: "",
+      },
+      screenshots: [],
+    },
+  });
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
 
- useEffect(() => {
-  const loadOffer = async () => {
-    // Only proceed if MSAL is initialized
-    if (!isInitialized) {
-      console.log("MSAL not initialized yet, waiting...");
-      return;
-    }
-
-    try {
-      // 1. Get account
-      const accounts = msalInstance.getAllAccounts();
-      if (!accounts.length) {
-        console.log("No accounts found");
+  useEffect(() => {
+    const loadOffer = async () => {
+      // Only proceed if MSAL is initialized
+      if (!isInitialized) {
+        console.log("MSAL not initialized yet, waiting...");
         return;
       }
 
-      // 2. Acquire token
-      const tokenResponse = await msalInstance.acquireTokenSilent({
-        scopes: ["https://graph.microsoft.com/.default"],
-        account: accounts[0],
-      });
+      try {
+        // 1. Get account
+        const accounts = msalInstance.getAllAccounts();
+        if (!accounts.length) {
+          console.log("No accounts found");
+          return;
+        }
 
-      // 3. Fetch offer from your backend
-      const res = await fetch(`https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/offers/${offerId}`, {
-        headers: {
-          Authorization: `Bearer ${tokenResponse.accessToken}`,
-          Accept: "application/json",
-        },
-      });
+        // 2. Acquire token
+        const tokenResponse = await msalInstance.acquireTokenSilent({
+          scopes: ["https://graph.microsoft.com/.default"],
+          account: accounts[0],
+        });
 
-      const raw = await res.json();
-      console.log("Fetched offer data:", raw);
-
-      // 4. Map to offerData structure
-      // Find different resource types from the API response
-      const productResource = raw.resources?.find((r: any) => r.type === "softwareAsAService");
-      const marketplaceSetup = raw.resources?.find((r: any) => r.resourceName === "marketplaceSetup");
-      const properties = raw.resources?.find((r: any) => r.resourceName === "productProperties");
-      const listing = raw.resources?.find((r: any) => r.resourceName === "mainListing");
-      const techConfig = raw.resources?.find((r: any) => r.resourceName === "technicalConfiguration");
-      const priceAvailability = raw.resources?.find((r: any) => r.resourceName === "priceAndAvailability");
-      const resellerConfig = raw.resources?.find((r: any) => r.resourceName === "resellerConfiguration");
-      
-      // Extract plans
-      const planResources = raw.resources?.filter((r: any) => r.resourceName?.includes("Plan") && !r.resourceName?.includes("Pricing") && !r.resourceName?.includes("Listing"));
-      const planListings = raw.resources?.filter((r: any) => r.resourceName?.includes("PlanListing"));
-      const planPricings = raw.resources?.filter((r: any) => r.resourceName?.includes("PlanPricing"));
-      
-      // Map plans data
-      const plans = planResources?.map((plan: any) => {
-        const listing = planListings?.find((l: any) => l.plan?.externalId === plan.identity?.externalId);
-        const pricing = planPricings?.find((p: any) => p.plan?.externalId === plan.identity?.externalId);
-        
-        return {
-          name: plan.alias || listing?.name,
-          description: listing?.description,
-          price: pricing?.pricing?.recurrentPrice?.prices?.[0]?.pricePerPaymentInUsd,
-          billingPeriod: pricing?.pricing?.recurrentPrice?.prices?.[0]?.billingTerm?.type,
-          markets: pricing?.markets,
-          features: [], // This would need to come from another source or be hardcoded
-        };
-      }) || [];
-
-      setOfferData({
-        offer_alias: productResource?.alias,
-        website_url: listing?.generalLinks?.[0]?.link,
-        product_id: raw.product_id, // Add product_id at the top level
-        job_id: raw.job_id, // Add job_id at the top level
-        created_at: raw.created_at, // Add created_at at the top level
-        updated_at: raw.updated_at, // Add updated_at at the top level
-        status: raw.status, // Add status at the top level
-        
-        offer_setup: {
-          offerAlias: productResource?.alias,
-          sellThroughMicrosoft: marketplaceSetup?.sellThroughMicrosoft || false,
-          // useMicrosoftLicenseManagement: properties?.useMicrosoftLicenseManagement || false,
-          useMicrosoftLicenseManagementService: properties?.useMicrosoftLicenseManagementService,
-          requireLicenseForInstall: properties?.requireLicenseForInstall,
-          enableTestDrive: false, // This field doesn't seem to be in the API
-          category: properties?.categories?.web?.[0] || "Web",
-          publisherName: listing?.supportContact?.name || "Publisher",
-          type: productResource?.type === "softwareAsAService" ? "SaaS" : "Unknown",
-          visibility: priceAvailability?.audience || "Public",
-        },
-
-        properties: {
-          categories: {
-            primary: properties?.categories?.web?.[0] || "Web",
-            secondary: properties?.categories?.web?.slice(1) || []
+        // 3. Fetch offer from your backend
+        const res = await fetch(`https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/offers/${offerId}`, {
+          headers: {
+            Authorization: `Bearer ${tokenResponse.accessToken}`,
+            Accept: "application/json",
           },
-          appVersion: properties?.appVersion,
-          legalInfo: {
-            useStandardContract: properties?.termsConditions === "standardMicrosoft" || properties?.termsConditions === "standard",
-            privacyPolicyUrl: listing?.privacyPolicyLink,
-            termsOfUseUrl: properties?.termsOfUseUrl || "",
-            termsOfUseText: properties?.termsOfUse || "",
-            termsOfUseType: properties?.termsOfUseUrl ? "url" as const : "text" as const
+        });
+
+        const raw = await res.json();
+        console.log("Fetched offer data:", raw);
+
+        // 4. Map to offerData structure
+        // Find different resource types from the API response
+        const productResource = raw.resources?.find((r: any) => r.type === "softwareAsAService");
+        const marketplaceSetup = raw.resources?.find((r: any) => r.resourceName === "marketplaceSetup");
+        const properties = raw.resources?.find((r: any) => r.resourceName === "productProperties");
+        const listing = raw.resources?.find((r: any) => r.resourceName === "mainListing");
+        const techConfig = raw.resources?.find((r: any) => r.resourceName === "technicalConfiguration");
+        const priceAvailability = raw.resources?.find((r: any) => r.resourceName === "priceAndAvailability");
+        const resellerConfig = raw.resources?.find((r: any) => r.resourceName === "resellerConfiguration");
+
+        // Extract plans
+        const planResources = raw.resources?.filter((r: any) => r.resourceName?.includes("Plan") && !r.resourceName?.includes("Pricing") && !r.resourceName?.includes("Listing"));
+        const planListings = raw.resources?.filter((r: any) => r.resourceName?.includes("PlanListing"));
+        const planPricings = raw.resources?.filter((r: any) => r.resourceName?.includes("PlanPricing"));
+
+        // Map plans data
+        const plans = planResources?.map((plan: any) => {
+          const listing = planListings?.find((l: any) => l.plan?.externalId === plan.identity?.externalId);
+          const pricing = planPricings?.find((p: any) => p.plan?.externalId === plan.identity?.externalId);
+
+          return {
+            name: plan.alias || listing?.name,
+            description: listing?.description,
+            price: pricing?.pricing?.recurrentPrice?.prices?.[0]?.pricePerPaymentInUsd,
+            billingPeriod: pricing?.pricing?.recurrentPrice?.prices?.[0]?.billingTerm?.type,
+            markets: pricing?.markets,
+            features: [], // This would need to come from another source or be hardcoded
+            pricingModel: pricing?.pricing?.recurrentPrice?.recurrentPriceMode || "flatRate",
+            userLimits: pricing?.pricing?.recurrentPrice?.userLimits || { min: 1, max: 10000 }
+          };
+        }) || [];
+
+        setOfferData({
+          offer_alias: productResource?.alias,
+          website_url: listing?.generalLinks?.[0]?.link,
+          product_id: raw.product_id, // Add product_id at the top level
+          job_id: raw.job_id, // Add job_id at the top level
+          created_at: raw.created_at, // Add created_at at the top level
+          updated_at: raw.updated_at, // Add updated_at at the top level
+          status: raw.status, // Add status at the top level
+
+          offer_setup: {
+            offerAlias: productResource?.alias,
+            sellThroughMicrosoft: marketplaceSetup?.sellThroughMicrosoft || false,
+            // useMicrosoftLicenseManagement: properties?.useMicrosoftLicenseManagement || false,
+            useMicrosoftLicenseManagementService: properties?.useMicrosoftLicenseManagementService,
+            requireLicenseForInstall: properties?.requireLicenseForInstall,
+            enableTestDrive: false, // This field doesn't seem to be in the API
+            category: properties?.categories?.web?.[0] || "Web",
+            publisherName: listing?.supportContact?.name || "Publisher",
+            type: productResource?.type === "softwareAsAService" ? "SaaS" : "Unknown",
+            visibility: priceAvailability?.audience || "Public",
           },
-          standardContractAmendment: properties?.standardContractAmendment || "",
+
+          properties: {
+            categories: {
+              primary: properties?.categories?.web?.[0] || "Web",
+              secondary: properties?.categories?.web?.slice(1) || []
+            },
+            appVersion: properties?.appVersion,
+            legalInfo: {
+              useStandardContract: properties?.termsConditions === "standardMicrosoft" || properties?.termsConditions === "standard",
+              privacyPolicyUrl: listing?.privacyPolicyLink,
+              termsOfUseUrl: properties?.termsOfUseUrl || "",
+              termsOfUseText: properties?.termsOfUse || "",
+              termsOfUseType: properties?.termsOfUseUrl ? "url" as const : "text" as const
+            },
+            standardContractAmendment: properties?.standardContractAmendment || "",
             sku: productResource?.identity?.externalId,
-          publisherId: raw.product_id,
-          version: properties?.appVersion,
-          keywords: listing?.searchKeywords || [],
-          supportContact: listing?.supportContact?.email,
-          legalTerms: properties?.termsOfUse,
-        },
-
-        offer_listing: {
-          name: listing?.title || "Untitled Offer",
-          summary: listing?.searchResultSummary || "",
-          searchSummary: listing?.searchResultSummary || "",
-          language: listing?.languageId?.replace("-", "_") || "en_us",
-          description: listing?.description || "",
-          longDescription: listing?.description || "",
-          gettingStartedInstructions: listing?.gettingStartedInstructions || "",
-          images: [], // Would need to extract from somewhere else
-          searchKeywords: listing?.searchKeywords || [],
-          contacts: {
-            support: listing?.supportContact || {},
-            engineering: listing?.engineeringContact || {},
+            publisherId: raw.product_id,
+            version: properties?.appVersion,
+            keywords: listing?.searchKeywords || [],
+            supportContact: listing?.supportContact?.email,
+            legalTerms: properties?.termsOfUse,
           },
-          marketingUrls: {
-            website: listing?.generalLinks?.[0]?.link || "",
-            privacyPolicy: listing?.privacyPolicyLink || "",
-            supportUrl: listing?.globalSupportWebsite || "",
+
+          offer_listing: {
+            name: listing?.title || "Untitled Offer",
+            summary: listing?.searchResultSummary || "",
+            searchSummary: listing?.searchResultSummary || "",
+            language: listing?.languageId?.replace("-", "_") || "en_us",
+            description: listing?.description || "",
+            longDescription: listing?.description || "",
+            gettingStartedInstructions: listing?.gettingStartedInstructions || "",
+            images: [], // Would need to extract from somewhere else
+            searchKeywords: listing?.searchKeywords || [],
+            contacts: {
+              support: listing?.supportContact || {},
+              engineering: listing?.engineeringContact || {},
+              csp: listing?.cloudSolutionProviderContact || {},
+            },
+            cloudSolutionProviderMarketingMaterials: listing?.cloudSolutionProviderMarketingMaterials || "",
+            marketingUrls: {
+              website: listing?.generalLinks?.[0]?.link || "",
+              privacyPolicy: listing?.privacyPolicyLink || "",
+              supportUrl: listing?.globalSupportWebsite || "",
+            },
+            generalLinks: listing?.generalLinks || [],
           },
-          generalLinks: listing?.generalLinks || [],
-        },
 
-        plans: plans,
+          plans: plans,
 
-        technical_config: {
-          landingPageUrl: techConfig?.landingPageUrl,
-          connectionWebhook: techConfig?.connectionWebhook,
-          entraAppId: techConfig?.azureAdAppId,
-          entraTenantId: techConfig?.azureAdTenantId,
-          integrationType: "OAuth2",
-          loginUrl: techConfig?.landingPageUrl,
-          webhookEnabled: !!techConfig?.connectionWebhook,
-        },
-
-        preview_audience: {
-          previewAudience: priceAvailability?.previewAudiences?.map((p: any) => p.id) || [],
-          testerEmails: priceAvailability?.previewAudiences?.map((p: any) => p.id) || [],
-          allowSandboxTesting: true,
-        },
-
-        resell_csp: {
-          resellThroughCSP: resellerConfig?.resellerChannelState || "none",
-          specificCSPs: resellerConfig?.audiences || [],
-          availableForResellers: resellerConfig?.resellerChannelState === "all",
-          partnerMargin: "15%",
-          contractRequired: false,
-        },
-
-        supplemental_content: {
-          supplementalContent: {
-            saasScenario: "fullyHosted",
-            subscriptionIds: []
+          technical_config: {
+            landingPageUrl: techConfig?.landingPageUrl,
+            connectionWebhook: techConfig?.connectionWebhook,
+            entraAppId: techConfig?.azureAdAppId,
+            entraTenantId: techConfig?.azureAdTenantId,
+            integrationType: "OAuth2",
+            loginUrl: techConfig?.landingPageUrl,
+            webhookEnabled: !!techConfig?.connectionWebhook,
           },
-          documents: [],
-          videos: [],
-        },
-      });
-    } catch (error) {
-      console.error("Error loading offer:", error);
-      // Continue with demo data for now
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  loadOffer();
-}, [offerId, msalInstance, isInitialized]);
+          preview_audience: {
+            previewAudience: priceAvailability?.previewAudiences?.map((p: any) => p.id) || [],
+            testerEmails: priceAvailability?.previewAudiences?.map((p: any) => p.id) || [],
+            allowSandboxTesting: true,
+          },
+
+          resell_csp: {
+            resellThroughCSP: resellerConfig?.resellerChannelState || "none",
+            specificCSPs: resellerConfig?.audiences || [],
+            availableForResellers: resellerConfig?.resellerChannelState === "all",
+            partnerMargin: "15%",
+            contractRequired: false,
+          },
+
+          supplemental_content: {
+            supplementalContent: {
+              saasScenario: "fullyHosted",
+              subscriptionIds: []
+            },
+            documents: [],
+            videos: [],
+          },
+        });
+      } catch (error) {
+        console.error("Error loading offer:", error);
+        // Continue with demo data for now
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadOffer();
+  }, [offerId, msalInstance, isInitialized]);
 
 
   const handleApproveAndPublish = async () => {
     setIsSubmitting(true); // Start loading
-    
+
     try {
       //toast.success("Submitting offer to Partner Center...");
-      
+
       // Get access token for authentication
       const accounts = msalInstance.getAllAccounts();
       if (!accounts.length) {
@@ -384,18 +392,18 @@ const OfferReview = () => {
 
       const result = await response.json();
       console.log('Submit to Partner Center result:', result);
-      
+
       if (result.job_status === 'running') {
         toast(`Submitting offer to Partner Center...`);
-        
+
         // Update offer status to "in_progress" after successful submission
         try {
           // Convert current offer data to API format with status "in_progress"
-          const apiPayload = await convertToApiFormat({...offerData, status: 'in_progress'});
+          const apiPayload = await convertToApiFormat({ ...offerData, status: 'in_progress' });
           apiPayload.status = "in_progress";
 
-          console.log('Updating offer status to in_progress with payload:',  JSON.stringify(apiPayload));
-          
+          console.log('Updating offer status to in_progress with payload:', JSON.stringify(apiPayload));
+
           // Send PUT request to update the offer status
           const updateResponse = await fetch(
             `https://ca-ailaunchpad-cc-001.wittysky-b9a849a9.canadacentral.azurecontainerapps.io/offers/${offerId}`,
@@ -413,7 +421,7 @@ const OfferReview = () => {
           if (updateResponse.ok) {
             const updateResult = await updateResponse.json();
             console.log('Offer status updated to in_progress:', updateResult);
-            
+
             // Update local state to reflect the status change
             setOfferData((prev: any) => ({
               ...prev,
@@ -426,12 +434,12 @@ const OfferReview = () => {
           console.error('Error updating offer status:', statusUpdateError);
           // Don't fail the whole process if status update fails
         }
-        
+
         navigate(`/offer/publish/${offerId}`);
       } else {
         toast.error(`Submission failed: ${result.message || 'Unknown error'}`);
       }
-      
+
     } catch (error) {
       console.error('Submit to Partner Center failed:', error);
       toast.error("Failed to submit offer to Partner Center");
@@ -459,16 +467,16 @@ const OfferReview = () => {
     };
 
     setIsSaving(true); // Start loading
-    
+
     try {
       const columnName = columnMap[sectionId];
-      
+
       // Update local state first
       const updatedOfferData = {
         ...offerData,
         [columnName]: updatedData
       };
-      
+
       setOfferData(updatedOfferData);
 
       // Get authentication token
@@ -527,7 +535,7 @@ const OfferReview = () => {
   const uploadMediaAssets = async (accessToken: string, files: any) => {
     try {
       const formData = new FormData();
-      
+
       // Add logo files - match the curl command format
       if (files.logoSmall) {
         formData.append('logo_small', files.logoSmall);
@@ -541,7 +549,7 @@ const OfferReview = () => {
       if (files.logoWide) {
         formData.append('logo_wide', files.logoWide);
       }
-      
+
       // Add screenshot files
       if (files.screenshots) {
         files.screenshots.forEach((screenshot: File, index: number) => {
@@ -581,7 +589,7 @@ const OfferReview = () => {
       const result = await response.json();
       console.log('------Asset upload result:', result);
       toast.success("Media assets uploaded successfully");
-      
+
     } catch (error) {
       console.error('Error uploading assets:', error);
       toast.error(`Failed to upload media assets: ${error.message}`);
@@ -593,7 +601,7 @@ const OfferReview = () => {
   const getOfferKind = (offerData: any) => {
     const offerType = offerData.offer_setup?.type;
     console.log('Detected offer type:', offerType, 'Full offer_setup:', offerData.offer_setup);
-   
+
     switch (offerType) {
       case 'SaaS':
         return 'azureSaaS';
@@ -607,16 +615,16 @@ const OfferReview = () => {
       default:
         return 'azureVM';
     }
-    
+
   };
 
   // Helper function to convert internal offer data to API format
   const convertToApiFormat = async (data: any) => {
     // Get the original offer data to preserve structure and IDs
     const originalData = offerData;
-   const offerKind = getOfferKind(data);
+    const offerKind = getOfferKind(data);
     console.log('-------------Converting to API format. Original data:', originalData.product_id);
-    
+
     return {
       "$schema": "https://schema.mp.microsoft.com/schema/configure/2022-03-01-preview2",
       "id": offerId,
@@ -662,11 +670,11 @@ const OfferReview = () => {
           "kind": offerKind,
           "termsConditions": data.properties?.legalInfo?.useStandardContract ? "standardMicrosoft" : "custom",
           "standardContractAmendment": data.properties?.legalInfo?.useStandardContract ? (data.properties?.standardContractAmendment || "") : undefined,
-          "termsOfUseUrl": data.properties?.legalInfo?.termsOfUseType === "url" ? 
-            (data.properties?.legalInfo?.termsOfUseUrl || "https://www.yourcompany.com/legal/terms-of-use") : 
+          "termsOfUseUrl": data.properties?.legalInfo?.termsOfUseType === "url" ?
+            (data.properties?.legalInfo?.termsOfUseUrl || "https://www.yourcompany.com/legal/terms-of-use") :
             undefined,
-          "termsOfUse": data.properties?.legalInfo?.termsOfUseType === "text" ? 
-            (data.properties?.legalInfo?.termsOfUseText || data.properties?.legalTerms || "Your custom terms and conditions text goes here.") : 
+          "termsOfUse": data.properties?.legalInfo?.termsOfUseType === "text" ?
+            (data.properties?.legalInfo?.termsOfUseText || data.properties?.legalTerms || "Your custom terms and conditions text goes here.") :
             (data.properties?.legalTerms || "Your custom terms and conditions text goes here."),
           "categories": {
             "web": [data.properties?.categories?.primary || "web"]
@@ -695,6 +703,12 @@ const OfferReview = () => {
             "email": data.offer_listing?.contacts?.engineering?.email || "engineering@yourcompany.com",
             "phone": data.offer_listing?.contacts?.engineering?.phone || "+1-800-123-4568"
           },
+          "cloudSolutionProviderContact": {
+            "name": data.offer_listing?.contacts?.csp?.name || "CSP Contact",
+            "email": data.offer_listing?.contacts?.csp?.email || "csp@yourcompany.com",
+            "phone": data.offer_listing?.contacts?.csp?.phone || "+1-800-000-0000"
+          },
+          "cloudSolutionProviderMarketingMaterials": data.offer_listing?.cloudSolutionProviderMarketingMaterials || "https://cspmarketingmaterials.com",
           "generalLinks": data.offer_listing?.generalLinks || [
             {
               "displayText": "Company Website",
@@ -726,22 +740,88 @@ const OfferReview = () => {
             "id": email,
             "label": `Preview User: ${email}`
           })) || [
-            {
-              "type": "email",
-              "id": "user@example.com",
-              "label": "Preview User 1"
-            }
-          ]
+              {
+                "type": "email",
+                "id": "user@example.com",
+                "label": "Preview User 1"
+              }
+            ]
         },
         {
           "$schema": "https://schema.mp.microsoft.com/schema/reseller/2022-03-01-preview2",
           "resourceName": "resellerConfiguration",
           "product": data.product_id || "product/default",
-          "resellerChannelState": data.resell_csp?.resellThroughCSP === "all" ? "all" : 
-                                  data.resell_csp?.resellThroughCSP === "none" ? "none" : 
-                                  data.resell_csp?.resellThroughCSP === "specific" ? "some" : "none",
+          "resellerChannelState": data.resell_csp?.resellThroughCSP === "all" ? "all" :
+            data.resell_csp?.resellThroughCSP === "none" ? "none" :
+              data.resell_csp?.resellThroughCSP === "specific" ? "some" : "none",
           "audiences": data.resell_csp?.resellThroughCSP === "specific" ? (data.resell_csp?.specificCSPs || []) : []
-        }
+        },
+        // Add plan resources dynamically
+        ...(data.plans ? data.plans.flatMap((plan: any, index: number) => {
+          const planExternalId = `${plan.name || `plan-${index + 1}`}`.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
+          const planResourceName = `${planExternalId}Plan`;
+          const planListingResourceName = `${planExternalId}PlanListing`;
+          const planPricingResourceName = `${planExternalId}PlanPricing`;
+
+          const billingTerm = plan.billingPeriod === "month" ? { type: "month", value: 1 } :
+            plan.billingPeriod === "year" ? { type: "year", value: 1 } :
+              { type: "month", value: 1 };
+
+          return [
+            // Plan Resource
+            {
+              "$schema": "https://schema.mp.microsoft.com/schema/plan/2022-03-01-preview3",
+              "resourceName": planResourceName,
+              "product": data.product_id || "product/default",
+              "identity": {
+                "externalId": planExternalId
+              },
+              "alias": plan.name || `Plan ${index + 1}`
+            },
+            // Plan Listing Resource
+            {
+              "$schema": "https://schema.mp.microsoft.com/schema/plan-listing/2022-03-01-preview5",
+              "resourceName": planListingResourceName,
+              "kind": "azureSaaS-plan",
+              "product": data.product_id || "product/default",
+              "plan": {
+                "externalId": planExternalId
+              },
+              "languageId": "en-us",
+              "name": plan.name || `Plan ${index + 1}`,
+              "description": plan.description || `Plan ${index + 1} description`
+            },
+            // Plan Pricing Resource
+            {
+              "$schema": "https://schema.mp.microsoft.com/schema/price-and-availability-plan/2022-03-01-preview4",
+              "resourceName": planPricingResourceName,
+              "product": data.product_id || "product/default",
+              "plan": {
+                "externalId": planExternalId
+              },
+              "audience": "public",
+              "markets": plan.markets || ["us", "gb", "ca", "au"],
+              "pricing": {
+                "recurrentPrice": {
+                  "priceInputOption": "usd",
+                  "recurrentPriceMode": plan.pricingModel === "perUser" ? "perUser" : "flatRate",
+                  ...(plan.pricingModel === "perUser" && plan.userLimits ? {
+                    "userLimits": {
+                      "min": plan.userLimits.min || 1,
+                      "max": plan.userLimits.max || 10000
+                    }
+                  } : {}),
+                  "prices": [
+                    {
+                      "billingTerm": billingTerm,
+                      "pricePerPaymentInUsd": plan.price || 0
+                    }
+                  ]
+                }
+              }
+            }
+          ];
+        }) : [])
       ],
       "product_id": data.product_id || "product/default",
       "job_id": data.job_id || "default-job-id",
@@ -897,7 +977,18 @@ const OfferReview = () => {
                           </span>
                           <span className="text-sm text-muted-foreground">
                             /{plan.billing?.term || plan.billingPeriod || "month"}
+                            {plan.pricingModel === "perUser" ? " per user" : ""}
                           </span>
+                          {plan.pricingModel && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {plan.pricingModel === "flatRate" ? "Flat Rate" : "Per User"}
+                              {plan.pricingModel === "perUser" && plan.userLimits && (
+                                <div className="text-xs">
+                                  {plan.userLimits.min} - {plan.userLimits.max} users
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                       {plan.features && (
