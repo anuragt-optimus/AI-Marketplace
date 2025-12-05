@@ -6,6 +6,7 @@ interface PropertiesSectionProps {
       primary: string;
       secondary?: string[];
     };
+    industries?: string[];
     appVersion?: string;
     useMicrosoftLicenseManagement?: boolean;
     legalInfo?: {
@@ -36,6 +37,19 @@ export const PropertiesSection = ({ data }: PropertiesSectionProps) => {
           ))}
         </div>
       </div>
+
+      {data.industries && data.industries.length > 0 && (
+        <div>
+          <h4 className="text-sm font-semibold text-foreground mb-2">Industries</h4>
+          <div className="flex flex-wrap gap-2">
+            {data.industries.map((industry, idx) => (
+              <Badge key={idx} variant="outline" className="text-xs">
+                {industry}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
 
       {data.appVersion && (
         <div className="p-3 bg-muted rounded-lg">
