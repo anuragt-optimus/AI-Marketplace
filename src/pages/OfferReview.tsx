@@ -48,6 +48,7 @@ const OfferReview = () => {
         primary: "Productivity",
         secondary: ["AI", "Video", "Content Creation"]
       },
+      industries: ["Education", "MediaAndCommunications", "ProfessionalServices"],
       appVersion: "v1.0",
       legalInfo: {
         useStandardContract: true,
@@ -310,6 +311,7 @@ const OfferReview = () => {
               primary: properties?.categories?.web?.[0] || "Web",
               secondary: properties?.categories?.web?.slice(1) || []
             },
+            industries: parseIndustriesFromApi(properties?.industries),
             appVersion: properties?.appVersion,
             legalInfo: {
               useStandardContract: properties?.termsConditions === "standardMicrosoft" || properties?.termsConditions === "standard",
@@ -495,6 +497,12 @@ const OfferReview = () => {
   };
 
   const handleEditSection = (sectionId: string, sectionName: string) => {
+    // Prevent editing if the offer has been submitted
+    if (offerData?.status === 'in_progress' || offerData?.status === 'submitted') {
+      toast.error("Cannot edit offer that has been submitted to Partner Center");
+      return;
+    }
+    
     setActiveSection(sectionId);
     setEditingSection(sectionId);
   };
@@ -900,6 +908,31 @@ const OfferReview = () => {
 
   };
 
+  // Helper function to convert industries object back to array
+  const parseIndustriesFromApi = (industriesObj: any) => {
+    if (!industriesObj || typeof industriesObj !== 'object') {
+      return [];
+    }
+    
+    // If it's already an array (old format), return as is
+    if (Array.isArray(industriesObj)) {
+      return industriesObj;
+    }
+    
+    // Convert object keys back to array (using original names)
+    return Object.keys(industriesObj);
+  };
+
+  // Helper function to transform industries array to object structure (using original names)
+  const transformIndustries = (industries: string[]) => {
+    const industriesObject: Record<string, string[]> = {};
+    industries.forEach(industry => {
+      industriesObject[industry] = [industry];
+    });
+    console.log('Transformed industries:', { original: industries, transformed: industriesObject });
+    return industriesObject;
+  };
+
   // Helper function to convert internal offer data to API format
   const convertToApiFormat = async (data: any) => {
     // Get the original offer data to preserve structure and IDs
@@ -964,6 +997,8 @@ const OfferReview = () => {
           "categories": {
             "web": [data.properties?.categories?.primary || "web"]
           },
+          "industries": data.properties?.industries && data.properties.industries.length > 0 ? 
+            transformIndustries(data.properties.industries) : {},
           "appVersion": data.properties?.appVersion || "1.0.0"
         },
         {
@@ -1201,6 +1236,9 @@ const OfferReview = () => {
     setEditingSection(null);
   };
 
+  // Check if editing is disabled due to offer status
+  const isEditingDisabled = offerData?.status === 'in_progress' || offerData?.status === 'submitted';
+
   if (isLoading) {
     return (
       <Layout>
@@ -1240,12 +1278,19 @@ const OfferReview = () => {
               {offerData.offer_alias || `ID: ${offerId}`}
             </p>
           </div>
-          <Button onClick={handleApproveAndPublish} size="lg" className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
+          <Button 
+            onClick={handleApproveAndPublish} 
+            size="lg" 
+            className="bg-primary hover:bg-primary/90" 
+            disabled={isSubmitting || isEditingDisabled}
+          >
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Submitting...
               </>
+            ) : isEditingDisabled ? (
+              "Already Submitted"
             ) : (
               "Submit to Partner Center"
             )}
@@ -1254,6 +1299,30 @@ const OfferReview = () => {
 
         <div className="flex-1 px-8 py-6 max-w-5xl mx-auto w-full">
           <div className="space-y-6 animate-fade-in">
+            {/* Show status warning if offer is submitted */}
+            {(offerData?.status === 'in_progress' || offerData?.status === 'submitted') && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.19-1.458-1.517-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-amber-800">
+                      Offer Submitted to Partner Center
+                    </h3>
+                    <div className="mt-2 text-sm text-amber-700">
+                      <p>
+                        This offer has been submitted to Partner Center and is currently being processed. 
+                        Editing is disabled until the submission process is complete.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Offer Setup */}
             <OfferSectionCard
               sectionId="offerSetup"
@@ -1270,7 +1339,7 @@ const OfferReview = () => {
               title="Properties"
               isActive={activeSection === "properties"}
               isEditing={editingSection === "properties"}
-              onEdit={handleEditSection}
+              onEdit={!isEditingDisabled ? handleEditSection : undefined}
               editComponent={
                 <PropertiesEdit
                   data={offerData.properties || {}}
@@ -1291,7 +1360,7 @@ const OfferReview = () => {
               title="Offer Listing"
               isActive={activeSection === "offerListing"}
               isEditing={editingSection === "offerListing"}
-              onEdit={handleEditSection}
+              onEdit={!isEditingDisabled ? handleEditSection : undefined}
               editComponent={
                 <OfferListingEdit
                   data={offerData.offer_listing || {}}
@@ -1314,7 +1383,7 @@ const OfferReview = () => {
                 title="Plans & Pricing"
                 isActive={activeSection === "plans"}
                 isEditing={editingSection === "plans"}
-                onEdit={handleEditSection}
+                onEdit={!isEditingDisabled ? handleEditSection : undefined}
                 editComponent={
                   <PlansEdit
                     data={offerData.plans}
@@ -1386,7 +1455,7 @@ const OfferReview = () => {
               title="Technical Configuration"
               isActive={activeSection === "technicalConfig"}
               isEditing={editingSection === "technicalConfig"}
-              onEdit={handleEditSection}
+              onEdit={!isEditingDisabled ? handleEditSection : undefined}
               editComponent={
                 <TechnicalConfigEdit
                   data={offerData.technical_config || {}}
@@ -1405,7 +1474,7 @@ const OfferReview = () => {
               title="Preview Audience"
               isActive={activeSection === "previewAudience"}
               isEditing={editingSection === "previewAudience"}
-              onEdit={handleEditSection}
+              onEdit={!isEditingDisabled ? handleEditSection : undefined}
               editComponent={
                 <PreviewAudienceEdit
                   data={offerData.preview_audience || {}}
@@ -1424,7 +1493,7 @@ const OfferReview = () => {
               title="Resell through CSPs"
               isActive={activeSection === "resellCSP"}
               isEditing={editingSection === "resellCSP"}
-              onEdit={handleEditSection}
+              onEdit={!isEditingDisabled ? handleEditSection : undefined}
               editComponent={
                 <ResellCSPEdit
                   data={offerData.resell_csp || {}}
@@ -1443,7 +1512,7 @@ const OfferReview = () => {
               title="Media"
               isActive={activeSection === "media"}
               isEditing={editingSection === "media"}
-              onEdit={handleEditSection}
+              onEdit={!isEditingDisabled ? handleEditSection : undefined}
               editComponent={
                 <MediaEdit
                   data={offerData.media || {}}

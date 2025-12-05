@@ -9,12 +9,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { X, Loader2 } from "lucide-react";
-import { PRIMARY_CATEGORIES } from "@/constants/partnerCenterCategories";
+import { PRIMARY_CATEGORIES, INDUSTRIES } from "@/constants/partnerCenterCategories";
 import { AISelectField } from "@/components/review/AISelectField";
 
 interface PropertiesEditProps {
   data: {
     categories?: { primary: string; secondary?: string[] };
+    industries?: string[];
     appVersion?: string;
     legalInfo?: {
       useStandardContract: boolean;
@@ -41,6 +42,8 @@ export const PropertiesEdit = ({ data, websiteUrl, offerId, onSave, onCancel, is
     (data?.legalInfo?.termsOfUseText ? 'text' : 'url')
   );
 
+  const [selectedIndustries, setSelectedIndustries] = useState<string[]>(data?.industries || []);
+
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
       categories: {
@@ -66,6 +69,7 @@ export const PropertiesEdit = ({ data, websiteUrl, offerId, onSave, onCancel, is
   const onSubmit = (formData: any) => {
     const updatedData = {
       ...formData,
+      industries: selectedIndustries,
       legalInfo: {
         ...formData.legalInfo,
         termsOfUseType: termsOfUseType,
@@ -111,6 +115,44 @@ export const PropertiesEdit = ({ data, websiteUrl, offerId, onSave, onCancel, is
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="space-y-3">
+        <Label>Industries</Label>
+        <div className="space-y-2">
+          <Select onValueChange={(industry) => {
+            if (!selectedIndustries.includes(industry)) {
+              setSelectedIndustries([...selectedIndustries, industry]);
+            }
+          }}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select industries" />
+            </SelectTrigger>
+            <SelectContent>
+              {INDUSTRIES.filter(industry => !selectedIndustries.includes(industry)).map((industry) => (
+                <SelectItem key={industry} value={industry}>
+                  {industry}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {selectedIndustries.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {selectedIndustries.map((industry, idx) => (
+                <Badge key={idx} variant="outline" className="text-xs">
+                  {industry}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedIndustries(selectedIndustries.filter(i => i !== industry))}
+                    className="ml-1 text-red-500 hover:text-red-700"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
 
