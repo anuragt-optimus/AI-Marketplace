@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { COUNTRY_NAME_TO_CODE, COUNTRY_CODE_TO_NAME } from "@/constants/markets";
 
 const OfferReview = () => {
   const { offerId } = useParams();
@@ -99,7 +100,7 @@ const OfferReview = () => {
         price: 19,
         billingPeriod: "month",
         features: ["10 videos/month", "Standard voice library", "Email support"],
-        markets: ["US", "IN", "UK"],
+        markets: ["United States", "India", "United Kingdom"],
         pricingModel: "flatRate",
         userLimits: { min: 1, max: 10000 }
       },
@@ -161,11 +162,7 @@ const OfferReview = () => {
 
     media: {
       logos: {
-        small: "",
-        medium: "",
         large: "",
-        wide: "",
-        hero: "",
       },
       screenshots: [],
     },
@@ -240,23 +237,10 @@ const OfferReview = () => {
         // Map media assets to logos and screenshots
         const mediaData = {
           logos: {
-            small: mediaAssets.find((asset: any) => 
-              asset.type === "azureLogoSmall" || 
-              asset.resourceName === "logoSmall"
-            )?.url || "",
-            medium: mediaAssets.find((asset: any) => 
-              asset.type === "azureLogoMedium" || 
-              asset.resourceName === "logoMedium"
-            )?.url || "",
             large: mediaAssets.find((asset: any) => 
               asset.type === "azureLogoLarge" || 
               asset.resourceName === "logoLarge"
             )?.url || "",
-            wide: mediaAssets.find((asset: any) => 
-              asset.type === "azureLogoWide" || 
-              asset.resourceName === "logoWide"
-            )?.url || "",
-            hero: "", // Hero logo not typically used in Partner Center
           },
           screenshots: mediaAssets
             .filter((asset: any) => 
@@ -277,7 +261,7 @@ const OfferReview = () => {
             description: listing?.description,
             price: pricing?.pricing?.recurrentPrice?.prices?.[0]?.pricePerPaymentInUsd,
             billingPeriod: pricing?.pricing?.recurrentPrice?.prices?.[0]?.billingTerm?.type,
-            markets: pricing?.markets,
+            markets: convertCountryCodesToNames(pricing?.markets || []),
             features: [], // This would need to come from another source or be hardcoded
             pricingModel: pricing?.pricing?.recurrentPrice?.recurrentPriceMode || "flatRate",
             userLimits: pricing?.pricing?.recurrentPrice?.userLimits || { min: 1, max: 10000 }
@@ -563,41 +547,7 @@ const OfferReview = () => {
       if (updatedOfferData.media) {
         const currentMediaAssets: any[] = [];
         
-        // Add logos if they exist and are not blob URLs
-        if (updatedOfferData.media?.logos?.small && !updatedOfferData.media.logos.small.startsWith('blob:')) {
-          currentMediaAssets.push({
-            "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview5",
-            "resourceName": "logoSmall",
-            "kind": "azure",
-            "product": updatedOfferData.product_id || "product/default",
-            "listing": { "resourceName": "mainListing" },
-            "languageId": "en-us",
-            "type": "azureLogoSmall",
-            "fileName": updatedOfferData.media.logos.small.split('/').pop() || "logo-small.png",
-            "friendlyName": "Small Logo (48x48)",
-            "description": "Small Logo (48x48) for marketplace listing",
-            "displayOrder": 0,
-            "url": updatedOfferData.media.logos.small
-          });
-        }
-        
-        if (updatedOfferData.media?.logos?.medium && !updatedOfferData.media.logos.medium.startsWith('blob:')) {
-          currentMediaAssets.push({
-            "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview5",
-            "resourceName": "logoMedium",
-            "kind": "azure",
-            "product": updatedOfferData.product_id || "product/default",
-            "listing": { "resourceName": "mainListing" },
-            "languageId": "en-us",
-            "type": "azureLogoMedium",
-            "fileName": updatedOfferData.media.logos.medium.split('/').pop() || "logo-medium.png",
-            "friendlyName": "Medium Logo (90x90)",
-            "description": "Medium Logo (90x90) for marketplace listing",
-            "displayOrder": 1,
-            "url": updatedOfferData.media.logos.medium
-          });
-        }
-        
+        // Add large logo if it exists and is not a blob URL
         if (updatedOfferData.media?.logos?.large && !updatedOfferData.media.logos.large.startsWith('blob:')) {
           currentMediaAssets.push({
             "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview5",
@@ -610,29 +560,12 @@ const OfferReview = () => {
             "fileName": updatedOfferData.media.logos.large.split('/').pop() || "logo-large.png",
             "friendlyName": "Large Logo (216x216)",
             "description": "Large Logo (216x216) for marketplace listing",
-            "displayOrder": 2,
+            "displayOrder": 0,
             "url": updatedOfferData.media.logos.large
           });
         }
         
-        if (updatedOfferData.media?.logos?.wide && !updatedOfferData.media.logos.wide.startsWith('blob:')) {
-          currentMediaAssets.push({
-            "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview5",
-            "resourceName": "logoWide",
-            "kind": "azure",
-            "product": updatedOfferData.product_id || "product/default",
-            "listing": { "resourceName": "mainListing" },
-            "languageId": "en-us",
-            "type": "azureLogoWide",
-            "fileName": updatedOfferData.media.logos.wide.split('/').pop() || "logo-wide.png",
-            "friendlyName": "Wide Logo (255x115)",
-            "description": "Wide Logo (255x115) for marketplace listing",
-            "displayOrder": 3,
-            "url": updatedOfferData.media.logos.wide
-          });
-        }
-        
-        // Add screenshots
+        // Add screenshot assets
         if (updatedOfferData.media?.screenshots) {
           updatedOfferData.media.screenshots
             .filter((screenshot: string) => screenshot && !screenshot.startsWith('blob:'))
@@ -693,18 +626,9 @@ const OfferReview = () => {
     try {
       const formData = new FormData();
 
-      // Add logo files - match the curl command format
-      if (files.logoSmall) {
-        formData.append('logo_small', files.logoSmall);
-      }
-      if (files.logoMedium) {
-        formData.append('logo_medium', files.logoMedium);
-      }
+      // Add logo files - only large logo
       if (files.logoLarge) {
         formData.append('logo_large', files.logoLarge);
-      }
-      if (files.logoWide) {
-        formData.append('logo_wide', files.logoWide);
       }
 
       // Add screenshot files
@@ -715,10 +639,7 @@ const OfferReview = () => {
       }
 
       console.log('Uploading media assets with formData:', {
-        logoSmall: !!files.logoSmall,
-        logoMedium: !!files.logoMedium,
         logoLarge: !!files.logoLarge,
-        logoWide: !!files.logoWide,
         screenshots: files.screenshots?.length || 0
       });
 
@@ -750,11 +671,7 @@ const OfferReview = () => {
       if (result.urls) {
         const updatedMediaData = {
           logos: {
-            small: result.urls.logo_small || offerData.media?.logos?.small || "",
-            medium: result.urls.logo_medium || offerData.media?.logos?.medium || "",
             large: result.urls.logo_large || offerData.media?.logos?.large || "",
-            wide: result.urls.logo_wide || offerData.media?.logos?.wide || "",
-            hero: offerData.media?.logos?.hero || ""
           },
           screenshots: result.urls.screenshots || offerData.media?.screenshots || []
         };
@@ -769,40 +686,6 @@ const OfferReview = () => {
         if (result.urls) {
           const newMediaAssets = [];
           
-          if (result.urls.logo_small) {
-            newMediaAssets.push({
-              "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview5",
-              "resourceName": "logoSmall",
-              "kind": "azure",
-              "product": offerData.product_id || "product/default",
-              "listing": { "resourceName": "mainListing" },
-              "languageId": "en-us",
-              "type": "azureLogoSmall",
-              "fileName": result.urls.logo_small.split('/').pop() || "logo-small.png",
-              "friendlyName": "Small Logo (48x48)",
-              "description": "Small Logo (48x48) for marketplace listing",
-              "displayOrder": 0,
-              "url": result.urls.logo_small
-            });
-          }
-          
-          if (result.urls.logo_medium) {
-            newMediaAssets.push({
-              "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview5",
-              "resourceName": "logoMedium",
-              "kind": "azure",
-              "product": offerData.product_id || "product/default",
-              "listing": { "resourceName": "mainListing" },
-              "languageId": "en-us",
-              "type": "azureLogoMedium",
-              "fileName": result.urls.logo_medium.split('/').pop() || "logo-medium.png",
-              "friendlyName": "Medium Logo (90x90)",
-              "description": "Medium Logo (90x90) for marketplace listing",
-              "displayOrder": 1,
-              "url": result.urls.logo_medium
-            });
-          }
-          
           if (result.urls.logo_large) {
             newMediaAssets.push({
               "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview5",
@@ -815,25 +698,8 @@ const OfferReview = () => {
               "fileName": result.urls.logo_large.split('/').pop() || "logo-large.png",
               "friendlyName": "Large Logo (216x216)",
               "description": "Large Logo (216x216) for marketplace listing",
-              "displayOrder": 2,
+              "displayOrder": 0,
               "url": result.urls.logo_large
-            });
-          }
-          
-          if (result.urls.logo_wide) {
-            newMediaAssets.push({
-              "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview5",
-              "resourceName": "logoWide",
-              "kind": "azure",
-              "product": offerData.product_id || "product/default",
-              "listing": { "resourceName": "mainListing" },
-              "languageId": "en-us",
-              "type": "azureLogoWide",
-              "fileName": result.urls.logo_wide.split('/').pop() || "logo-wide.png",
-              "friendlyName": "Wide Logo (255x115)",
-              "description": "Wide Logo (255x115) for marketplace listing",
-              "displayOrder": 3,
-              "url": result.urls.logo_wide
             });
           }
           
@@ -860,10 +726,7 @@ const OfferReview = () => {
           setOriginalMediaAssets(prev => {
             // Remove assets that were just uploaded
             let filtered = prev.filter(asset => {
-              if (result.urls.logo_small && (asset.type === "azureLogoSmall" || asset.resourceName === "logoSmall")) return false;
-              if (result.urls.logo_medium && (asset.type === "azureLogoMedium" || asset.resourceName === "logoMedium")) return false;
               if (result.urls.logo_large && (asset.type === "azureLogoLarge" || asset.resourceName === "logoLarge")) return false;
-              if (result.urls.logo_wide && (asset.type === "azureLogoWide" || asset.resourceName === "logoWide")) return false;
               if (result.urls.screenshots && (asset.type === "azureLogoScreenshot" || asset.resourceName?.includes("screenshot"))) return false;
               return true;
             });
@@ -906,6 +769,32 @@ const OfferReview = () => {
         return 'azureVM';
     }
 
+  };
+
+  // Default countries for plans
+  const default_countries = ["United States", "Canada", "United Kingdom"];
+
+  // Helper function to convert country names to country codes for API
+  const convertCountryNamesToCodes = (countryNames: string[]): string[] => {
+    return countryNames.map(name => {
+      // If it's already a code (2 letters), return as is
+      if (name.length === 2) {
+        return name.toLowerCase();
+      }
+      // Convert name to code
+      return COUNTRY_NAME_TO_CODE[name] || name.toLowerCase();
+    });
+  };
+
+  // Helper function to convert country codes from API to country names for UI
+  const convertCountryCodesToNames = (countryCodes: string[]): string[] => {
+    if (!countryCodes || !Array.isArray(countryCodes)) {
+      return [];
+    }
+    return countryCodes.map(code => {
+      const lowerCode = code.toLowerCase();
+      return COUNTRY_CODE_TO_NAME[lowerCode] || code;
+    });
   };
 
   // Helper function to convert industries object back to array
@@ -1120,7 +1009,7 @@ const OfferReview = () => {
                 "externalId": planExternalId
               },
               "audience": "public",
-              "markets": plan.markets || ["us", "gb", "ca", "au"],
+              "markets": convertCountryNamesToCodes(plan.markets || default_countries),
               "pricing": {
                 "recurrentPrice": {
                   "priceInputOption": "usd",
@@ -1145,36 +1034,6 @@ const OfferReview = () => {
         // Add media asset resources - preserve original assets from API
         ...originalMediaAssets,
         // Always include media assets that have valid URLs (not blob URLs) from current data
-        ...(data.media?.logos?.small && !data.media.logos.small.startsWith('blob:') && 
-            !originalMediaAssets.find(asset => asset.type === "azureLogoSmall" || asset.resourceName === "logoSmall") ? [{
-          "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview5",
-          "resourceName": "logoSmall",
-          "kind": "azure",
-          "product": data.product_id || "product/default",
-          "listing": { "resourceName": "mainListing" },
-          "languageId": "en-us",
-          "type": "azureLogoSmall",
-          "fileName": data.media.logos.small.split('/').pop() || "logo-small.png",
-          "friendlyName": "Small Logo (48x48)",
-          "description": "Small Logo (48x48) for marketplace listing",
-          "displayOrder": 0,
-          "url": data.media.logos.small
-        }] : []),
-        ...(data.media?.logos?.medium && !data.media.logos.medium.startsWith('blob:') && 
-            !originalMediaAssets.find(asset => asset.type === "azureLogoMedium" || asset.resourceName === "logoMedium") ? [{
-          "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview5",
-          "resourceName": "logoMedium",
-          "kind": "azure",
-          "product": data.product_id || "product/default",
-          "listing": { "resourceName": "mainListing" },
-          "languageId": "en-us",
-          "type": "azureLogoMedium",
-          "fileName": data.media.logos.medium.split('/').pop() || "logo-medium.png",
-          "friendlyName": "Medium Logo (90x90)",
-          "description": "Medium Logo (90x90) for marketplace listing",
-          "displayOrder": 1,
-          "url": data.media.logos.medium
-        }] : []),
         ...(data.media?.logos?.large && !data.media.logos.large.startsWith('blob:') && 
             !originalMediaAssets.find(asset => asset.type === "azureLogoLarge" || asset.resourceName === "logoLarge") ? [{
           "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview5",
@@ -1187,23 +1046,8 @@ const OfferReview = () => {
           "fileName": data.media.logos.large.split('/').pop() || "logo-large.png",
           "friendlyName": "Large Logo (216x216)",
           "description": "Large Logo (216x216) for marketplace listing",
-          "displayOrder": 2,
+          "displayOrder": 0,
           "url": data.media.logos.large
-        }] : []),
-        ...(data.media?.logos?.wide && !data.media.logos.wide.startsWith('blob:') && 
-            !originalMediaAssets.find(asset => asset.type === "azureLogoWide" || asset.resourceName === "logoWide") ? [{
-          "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview5",
-          "resourceName": "logoWide",
-          "kind": "azure",
-          "product": data.product_id || "product/default",
-          "listing": { "resourceName": "mainListing" },
-          "languageId": "en-us",
-          "type": "azureLogoWide",
-          "fileName": data.media.logos.wide.split('/').pop() || "logo-wide.png",
-          "friendlyName": "Wide Logo (255x115)",
-          "description": "Wide Logo (255x115) for marketplace listing",
-          "displayOrder": 3,
-          "url": data.media.logos.wide
         }] : []),
         ...(data.media?.screenshots ? data.media.screenshots
           .filter((screenshot: string) => screenshot && 

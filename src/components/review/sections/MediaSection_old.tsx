@@ -50,6 +50,16 @@ export const MediaSection = ({ data }: MediaSectionProps) => {
             )}
           </div>
         </div>
+                    if (parent) {
+                      parent.innerHTML = '<div class="w-20 h-20 mx-auto bg-gray-200 rounded border flex items-center justify-center text-xs text-muted-foreground">Error</div>';
+                    }
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">Large (216x216)</p>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Screenshots Section */}
@@ -64,31 +74,29 @@ export const MediaSection = ({ data }: MediaSectionProps) => {
                 <img 
                   src={screenshot} 
                   alt={`Screenshot ${idx + 1}`} 
-                  className="w-full h-32 object-cover rounded-lg border bg-muted"
+                  className="w-full h-32 sm:h-40 object-cover rounded border hover:shadow-md transition-shadow"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
                     const parent = target.parentElement;
                     if (parent) {
-                      parent.innerHTML = '<div class="w-full h-32 bg-gray-200 rounded-lg border flex items-center justify-center text-xs text-muted-foreground">Error loading image</div>';
+                      parent.innerHTML = '<div class="w-full h-32 sm:h-40 bg-gray-200 rounded border flex items-center justify-center text-sm text-muted-foreground">Image not found</div>';
                     }
                   }}
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-lg" />
-                <div className="absolute top-2 left-2">
-                  <Badge variant="secondary" className="text-xs">
-                    {idx + 1}
-                  </Badge>
-                </div>
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button 
-                    className="p-1 bg-white/80 hover:bg-white rounded"
-                    onClick={() => window.open(screenshot, '_blank')}
-                    title="View full size"
+                  <a 
+                    href={screenshot} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-1 bg-black/50 text-white rounded hover:bg-black/70 transition-colors"
                   >
-                    <ExternalLink className="h-3 w-3" />
-                  </button>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
                 </div>
+                <p className="text-xs text-muted-foreground mt-1 text-center">
+                  Screenshot {idx + 1}
+                </p>
               </div>
             ))}
           </div>

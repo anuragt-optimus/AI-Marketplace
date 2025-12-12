@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Trash2, Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Trash2, Plus, X } from "lucide-react";
 import { AITextField } from "@/components/review/AITextField";
+import { MARKETS } from "@/constants/markets";
 
 interface Plan {
   name: string;
@@ -70,6 +72,20 @@ export const PlansEdit = ({ data, websiteUrl, offerId, existingOfferData, onSave
     updatePlan(index, 'features', features);
   };
 
+  const addMarket = (planIndex: number, market: string) => {
+    const plan = plans[planIndex];
+    const currentMarkets = plan.markets || [];
+    if (!currentMarkets.includes(market)) {
+      updatePlan(planIndex, 'markets', [...currentMarkets, market]);
+    }
+  };
+
+  const removeMarket = (planIndex: number, marketToRemove: string) => {
+    const plan = plans[planIndex];
+    const currentMarkets = plan.markets || [];
+    updatePlan(planIndex, 'markets', currentMarkets.filter(market => market !== marketToRemove));
+  };
+
   const handleSave = () => {
     onSave(plans);
   };
@@ -117,6 +133,40 @@ export const PlansEdit = ({ data, websiteUrl, offerId, existingOfferData, onSave
                   <SelectItem value="one-time">One-time</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Markets</Label>
+            <div className="space-y-2">
+              <Select onValueChange={(market) => addMarket(idx, market)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select markets" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MARKETS.filter(market => !(plan.markets || []).includes(market)).map((market) => (
+                    <SelectItem key={market} value={market}>
+                      {market}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {(plan.markets || []).length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {(plan.markets || []).map((market, marketIdx) => (
+                    <Badge key={marketIdx} variant="outline" className="text-xs">
+                      {market}
+                      <button
+                        type="button"
+                        onClick={() => removeMarket(idx, market)}
+                        className="ml-1 text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

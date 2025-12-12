@@ -32,29 +32,11 @@ export const FIELD_REQUIREMENTS = {
 } as const;
 
 export const MEDIA_REQUIREMENTS = {
-  logoSmall: {
-    width: 48,
-    height: 48,
-    format: "PNG",
-    maxSize: 100 * 1024 // 100KB
-  },
-  logoMedium: {
-    width: 90,
-    height: 90,
-    format: "PNG",
-    maxSize: 100 * 1024
-  },
   logoLarge: {
     width: 216,
     height: 216,
     format: "PNG",
-    maxSize: 100 * 1024
-  },
-  logoWide: {
-    width: 255,
-    height: 115,
-    format: "PNG",
-    maxSize: 100 * 1024
+    maxSize: 100 * 1024 // 100KB
   },
   screenshot: {
     width: 1280,
