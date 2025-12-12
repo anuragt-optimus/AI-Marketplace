@@ -54,7 +54,7 @@ export const ResellCSPEdit = ({ data, onSave, onCancel, isSaving = false }: Rese
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="all" id="all" />
             <Label htmlFor="all" className="cursor-pointer font-normal">
-              All CSP partners can resell
+              Any partner in the CSP program
             </Label>
           </div>
           <div className="flex items-center space-x-2">
