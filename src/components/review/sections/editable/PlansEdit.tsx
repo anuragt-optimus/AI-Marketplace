@@ -245,19 +245,7 @@ export const PlansEdit = ({ data, websiteUrl, offerId, existingOfferData, onSave
             existingOfferData={existingOfferData}
           />
 
-          <AITextField
-            fieldName={`plans.${idx}.features`}
-            section="plans"
-            value={(plan.features || []).join('\n')}
-            onChange={(val) => updateFeatures(idx, val)}
-            label="Features (one per line)"
-            placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
-            multiline
-            rows={5}
-            websiteUrl={websiteUrl}
-            offerId={offerId}
-            existingOfferData={existingOfferData}
-          />
+         
         </div>
       ))}
 
