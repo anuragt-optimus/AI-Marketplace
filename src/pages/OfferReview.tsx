@@ -22,6 +22,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { COUNTRY_NAME_TO_CODE, COUNTRY_CODE_TO_NAME } from "@/constants/markets";
+import { htmlToPlainText, sanitizeHtml, plainTextToHtml } from "@/utils/htmlUtils";
 
 const OfferReview = () => {
   const { offerId } = useParams();
@@ -258,7 +259,7 @@ const OfferReview = () => {
 
           return {
             name: plan.alias || listing?.name,
-            description: listing?.description,
+            description: listing?.description ? htmlToPlainText(listing.description) : "",
             price: pricing?.pricing?.recurrentPrice?.prices?.[0]?.pricePerPaymentInUsd,
             billingPeriod: pricing?.pricing?.recurrentPrice?.prices?.[0]?.billingTerm?.type,
             markets: convertCountryCodesToNames(pricing?.markets || []),
@@ -318,9 +319,9 @@ const OfferReview = () => {
             summary: listing?.searchResultSummary || "",
             searchSummary: listing?.searchResultSummary || "",
             language: listing?.languageId?.replace("-", "_") || "en_us",
-            description: listing?.description || "",
-            longDescription: listing?.description || "",
-            gettingStartedInstructions: listing?.gettingStartedInstructions || "",
+            description: listing?.description ? htmlToPlainText(listing.description) : "",
+            longDescription: listing?.description ? htmlToPlainText(listing.description) : "",
+            gettingStartedInstructions: listing?.gettingStartedInstructions ? htmlToPlainText(listing.gettingStartedInstructions) : "",
             images: [], // Would need to extract from somewhere else
             searchKeywords: listing?.searchKeywords || [],
             contacts: {
@@ -898,8 +899,8 @@ const OfferReview = () => {
           "languageId": data.offer_listing?.language?.replace("_", "-") || "en-us",
           "title": data.offer_listing?.name || "Untitled Offer",
           "searchResultSummary": data.offer_listing?.summary || data.offer_listing?.searchSummary || "",
-          "description": data.offer_listing?.description || data.offer_listing?.longDescription || "",
-          "gettingStartedInstructions": data.offer_listing?.gettingStartedInstructions || "",
+          "description": plainTextToHtml(data.offer_listing?.description || data.offer_listing?.longDescription || ""),
+          "gettingStartedInstructions": plainTextToHtml(data.offer_listing?.gettingStartedInstructions || ""),
           "searchKeywords": data.offer_listing?.searchKeywords || data.properties?.keywords || ["saas", "web", "cloud"],
           "supportContact": {
             "name": data.offer_listing?.contacts?.support?.name || "Support Team",
@@ -998,7 +999,7 @@ const OfferReview = () => {
               },
               "languageId": "en-us",
               "name": plan.name || `Plan ${index + 1}`,
-              "description": plan.description || `Plan ${index + 1} description`
+              "description": plainTextToHtml(plan.description || `Plan ${index + 1} description`)
             },
             // Plan Pricing Resource
             {
